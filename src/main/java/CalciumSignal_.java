@@ -1,12 +1,10 @@
-package edu.udel.team17;
-
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 import ij.process.ImageProcessor;
-import imageJ.plugins.*;
+// import imageJ.plugins.*;
 
 public class CalciumSignal_ implements PlugIn {
 
@@ -14,8 +12,9 @@ public class CalciumSignal_ implements PlugIn {
         // plugin logic here
         // https://imagej.net/develop/ij1-plugins
 
-        PoorMan3DReg_ reg = new PoorMan3DReg_();
-        reg.run(arg);
+        IJ.showMessage("Hello, world!");
+        // PoorMan3DReg_ reg = new PoorMan3DReg_();
+        // reg.run(arg);
     }
 
     public static void main(String[] args) {
