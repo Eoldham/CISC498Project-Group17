@@ -1,14 +1,8 @@
-package imageJ.plugins;/*
-* File: SaveToVolumes_.java
-* Written: April 18, 2005
-* Author: Michael Liebling, California Institute of Technology, liebling@caltech.edu
-*
-*/
+package imageJ.plugins;
 
 import ij.*;
 import ij.gui.GenericDialog;
 import ij.plugin.*;
-import ij.process.*;
 import ij.io.*;
 
 

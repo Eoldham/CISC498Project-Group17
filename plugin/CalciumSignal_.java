@@ -1,24 +1,22 @@
 import ij.IJ;
-import ij.ImageJ;
 import ij.ImagePlus;
-import ij.gui.GenericDialog;
+import ij.WindowManager;
 import ij.plugin.PlugIn;
-import ij.process.ImageProcessor;
-// import imageJ.plugins.*;
+import imageJ.plugins.PoorMan3DReg_;
 
 public class CalciumSignal_ implements PlugIn {
 
     public void run(String arg) {
-        // plugin logic here
-        // https://imagej.net/develop/ij1-plugins
+        IJ.showMessage("Calcium Signal", "Welcome to the Calcium Signal plugin!");
 
-        IJ.showMessage("Hello, world!");
-        // PoorMan3DReg_ reg = new PoorMan3DReg_();
-        // reg.run(arg);
+        PoorMan3DReg_ reg = new PoorMan3DReg_();
+        reg.run(arg);
+
+        ImagePlus imp = WindowManager.getCurrentImage();
     }
 
     public static void main(String[] args) {
-        // make sure this runs in your IDE
+        // sanity check
         System.out.println("Hello, world!");
     }
 }

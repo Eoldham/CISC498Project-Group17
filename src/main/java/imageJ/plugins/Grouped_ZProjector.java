@@ -1,11 +1,4 @@
-package imageJ.plugins;/*
-* File: Grouped_ZProjector.java
-* Written: 25 Jan. 2000
-* Author: Charlie Holly <caholly@colby.edu>, Holly Mountain Software
-*
-* This code is in the public domain and may be freely used,
-* modified, or redistributed without permission.
-*/
+package imageJ.plugins;
 
 import ij.*;
 import ij.gui.GenericDialog;

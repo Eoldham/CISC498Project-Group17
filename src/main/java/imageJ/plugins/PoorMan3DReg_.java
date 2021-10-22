@@ -1,9 +1,4 @@
 package imageJ.plugins;/*====================================================================
-| Version: March 2, 2005, Modified by M.L. on April 2, 2005
-|  Modified by M.L. on September 24, 2010
-\===================================================================*/
-
-/*====================================================================
 | Michael Liebling
 | Biological Imaging Center, Beckman Institute
 | California Institute of Technology
