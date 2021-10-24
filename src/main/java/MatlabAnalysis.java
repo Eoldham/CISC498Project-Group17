@@ -7,17 +7,17 @@ import java.util.concurrent.Future;
 
 public class MatlabAnalysis {
 
-    public MatlabAnalysis(){
-        System.out.println("hello");
+    public MatlabAnalysis() throws Exception{
+        MatlabEngine eng = MatlabEngine.startMatlab();
+        eng.eval("results = readtable('dataFiles/ResultsCell.csv','Delimiter',',');");
+        eng.eval("disp(results);");
+        eng.eval("plot(results.Frame,results.Mean1); print('myPlot','-djpeg')");
+        eng.close();
+        System.out.println("successful matlab engine interaction");
+
     }
 
     public static void main(String args[]) throws Exception {
-        MatlabEngine eng = MatlabEngine.startMatlab();
-        eng.evalAsync("[X, Y] = meshgrid(-2:0.2:2);");
-        eng.evalAsync("Z = X .* exp(-X.^2 - Y.^2);");
-        Object[] Z = eng.getVariable("Z");
-        eng.close();
-        System.out.println("success");
-
+        MatlabAnalysis analysis = new MatlabAnalysis();
     }
 }
