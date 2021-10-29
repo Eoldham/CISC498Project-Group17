@@ -33,6 +33,11 @@ package imageJ.plugins;/*=======================================================
 | publish results that are based on it.
 \===================================================================*/
 
+/*
+MODIFIED BY EMMA ADELMANN
+for academic purposes
+ */
+
 /* compile with
 javac PoorMan3DReg_.java Grouped_ZProjector.java -classpath ../../ImageJ.app/Contents/Resources/Java/ij.jar  -Xmaxwarns 0
 */
@@ -82,11 +87,67 @@ public class PoorMan3DReg_
 
 { /* begin class PoorMan3Deg_ */
 
+	// class for encapsulating dialog-related parameters
+	public class PoorManDialog {
+		final private ImagePlus imp;
+		private int transformation, gs, defaultMethod;
+
+		public PoorManDialog(ImagePlus imp) {
+			this.imp = imp;
+		}
+
+		public int getTransformation() { return transformation; }
+		public int getGs() { return gs; }
+		public int getDefaultMethod() { return defaultMethod; }
+
+		public void initialize(GenericDialog gd, Grouped_ZProjector gzproj, int trans, int g, int def) {
+			/*
+			// Set the group size and the method from the dialog.
+			transformation = gd.getNextChoiceIndex();
+			gs = (int)gd.getNextNumber();
+			defaultMethod = gd.getNextChoiceIndex();
+
+			 */
+			transformation = trans;
+			gs = g;
+			defaultMethod = def;
+
+			// If the entered group size is invalid, post a message and
+			// then redisplay the dialog.
+			while ( !gzproj.validGroupSize(imp.getStackSize(), gs ) ) {
+				IJ.showMessage("The group size must evenly divide the " + "stack size (" + imp.getStackSize() + ").");
+				gd = buildDialog(imp.getStackSize(), IJ.getInstance());
+				gd.showDialog();
+
+				if(gd.wasCanceled())
+					return; //The user pushed the cancel button.
+				else {
+					// Set the group size and the method from the dialog.
+					gs = (int)gd.getNextNumber();
+					defaultMethod = gd.getNextChoiceIndex();
+					transformation = gd.getNextChoiceIndex();
+				}
+			}
+
+			if (gd.getNextBoolean()) {
+				final PoorMan3DRegCredits dialog = new PoorMan3DRegCredits(IJ.getInstance());
+				GUI.center(dialog);
+				dialog.setVisible(true);
+				return;
+			}
+		}
+
+
+	}
+
+
 /*....................................................................
 	Private global variables
 ....................................................................*/
 private static final double TINY = (double)Float.intBitsToFloat((int)0x33FFFFFF);
 private static int defaultMethod = ZProjector.AVG_METHOD;
+private PoorManDialog diag;
+private boolean showDiag = true;
 
 /*....................................................................
 	Public methods
@@ -136,37 +197,51 @@ public void run (
 		return;
 	}
 
+	Grouped_ZProjector gzproj = new Grouped_ZProjector();
+	if (showDiag) {
+		// Build and display the dialog.
+		GenericDialog gd = buildDialog(imp.getStackSize(), IJ.getInstance());
+		gd.showDialog();
 
+		if (gd.wasCanceled()) {
+			return;
+		}
 
-    // Build and display the dialog.
-    GenericDialog gd = buildDialog(imp.getStackSize(), IJ.getInstance());
-	gd.showDialog();
-	if (gd.wasCanceled()) {
-		return;
+		showDiag = false;
+
+		// Set the group size and the method from the dialog.
+		int transformation = gd.getNextChoiceIndex();
+		int gs = (int)gd.getNextNumber();
+		defaultMethod = gd.getNextChoiceIndex();
+
+		diag = new PoorManDialog(imp);
+		diag.initialize(gd, gzproj, transformation, gs, defaultMethod);
+		defaultMethod = diag.getDefaultMethod();
 	}
+
 	// Load the entered parameters
 
-    Grouped_ZProjector gzproj = new Grouped_ZProjector();
-    // Set the group size and the method from the dialog.
+	/*
+	// Set the group size and the method from the dialog.
 	int transformation = gd.getNextChoiceIndex();
-    int gs = (int)gd.getNextNumber();
-    defaultMethod = gd.getNextChoiceIndex();
-	
+	int gs = (int)gd.getNextNumber();
+	defaultMethod = gd.getNextChoiceIndex();
+
 	// If the entered group size is invalid, post a message and
 	// then redisplay the dialog.
 	while ( !gzproj.validGroupSize(imp.getStackSize(), gs ) ) {
 		IJ.showMessage("The group size must evenly divide the " + "stack size (" + imp.getStackSize() + ").");
-        gd = buildDialog(imp.getStackSize(), IJ.getInstance());
-        gd.showDialog();
+		gd = buildDialog(imp.getStackSize(), IJ.getInstance());
+		gd.showDialog();
 
-        if(gd.wasCanceled())
-        	return; //The user pushed the cancel button.
-        else {
-        	// Set the group size and the method from the dialog.
-            gs = (int)gd.getNextNumber();
-            defaultMethod = gd.getNextChoiceIndex();
+		if(gd.wasCanceled())
+			return; //The user pushed the cancel button.
+		else {
+			// Set the group size and the method from the dialog.
+			gs = (int)gd.getNextNumber();
+			defaultMethod = gd.getNextChoiceIndex();
 			transformation = gd.getNextChoiceIndex();
-        }
+		}
 	}
 
 	if (gd.getNextBoolean()) {
@@ -175,12 +250,16 @@ public void run (
 		dialog.setVisible(true);
 		return;
 	}
+
+	 */
+
 	
 	// We start by making a grouped z projection of the 3D+time stack to yield a 2D+time stack
 	// Check for RGB image.
     if(imp.getBitDepth()==24 ) {
 		gzproj.isRGB = true;
     }
+	int gs = diag.getGs();
     ImagePlus gzimp = gzproj.computeProjection(imp, gs);
 //	gzimp.show();
 
@@ -196,6 +275,7 @@ public void run (
 		{0.0, 0.0, 1.0}
 	};
 	double[][] anchorPoints = null;
+	int transformation = diag.getTransformation();
 	switch (transformation) {
 		case 0: {//Translation: 1 anchorpoint
 			anchorPoints = new double[1][3];

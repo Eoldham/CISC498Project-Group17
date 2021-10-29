@@ -7,6 +7,8 @@ imageJ=../fiji-win64/Fiji.app/plugins
 mvn clean package
 cp target/classes/CalciumSignal_.class plugin
 cp src/main/java/CalciumSignal_.java plugin
+# Uncomment below line if you needed to recompile any of the imageJ plugins files
+cp target/classes/imageJ/plugins/* plugin/imageJ/plugins
 cd plugin
 jar cvfM CalciumSignal_.jar CalciumSignal_.class CalciumSignal_.java imageJ/plugins/*.class plugins.config
 cd ..
