@@ -11,7 +11,6 @@ public class CalciumSignal_ implements PlugIn {
     public void run(String arg) {
         IJ.showMessage("Calcium Signal", "Welcome to the Calcium Signal plugin!");
 
-        // int imageCount = WindowManager.getImageCount();
         int[] idList = WindowManager.getIDList();
         PoorMan3DReg_ reg = new PoorMan3DReg_();
         _3D_objects_counter counter = new _3D_objects_counter();
@@ -23,7 +22,6 @@ public class CalciumSignal_ implements PlugIn {
             counter.run(arg);
         }
 
-        ImagePlus imp = WindowManager.getCurrentImage();
     }
 
     public static void main(String[] args) {

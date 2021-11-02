@@ -21,6 +21,52 @@ public class _3D_objects_counter implements PlugIn, AdjustmentListener, FocusLis
     int thr, minSize, maxSize, dotSize, fontSize;
     boolean excludeOnEdges, showObj, showSurf, showCentro, showCOM, showNb, whiteNb, newRT, showStat, showMaskedImg, closeImg, showSummary, redirect;
     Vector sliders, values;
+    boolean showDiag = true;
+
+    // class for encapsulating dialog-related parameters
+    public class _3DObjectsCounterDialog {
+        final private ImagePlus imp;
+
+        public _3DObjectsCounterDialog(ImagePlus imp) {
+            this.imp = imp;
+        }
+
+        public void initialize(_3D_objects_counter counter) {
+            GenericDialog gd=new GenericDialog("3D Object Counter v2.0");
+
+            gd.addSlider("Threshold", min, max, thr);
+            gd.addSlider("Slice", 1, nbSlices, nbSlices/2);
+
+            sliders=gd.getSliders();
+            ((Scrollbar)sliders.elementAt(0)).addAdjustmentListener(counter);
+            ((Scrollbar)sliders.elementAt(1)).addAdjustmentListener(counter);
+            values = gd.getNumericFields();
+            ((TextField)values.elementAt(0)).addFocusListener(counter);
+            ((TextField)values.elementAt(1)).addFocusListener(counter);
+
+            gd.addMessage("Size filter: ");
+            gd.addNumericField("Min.",minSize, 0);
+            gd.addNumericField("Max.", maxSize, 0);
+            gd.addCheckbox("Exclude_objects_on_edges", excludeOnEdges);
+
+            if (redirect) gd.addMessage("\nRedirection:\nImage used as a mask: "+counter.title+"\nMeasures will be done on: "+counter.redirectTo+(showMaskedImg?"\nMasked image will be shown":"")+".");
+            if (closeImg) gd.addMessage("\nCaution:\nImage(s) will be closed during the processing\n(see 3D-OC options to change this setting).");
+
+            gd.showDialog();
+
+            if (gd.wasCanceled()){
+                ip.resetThreshold();
+                imp.updateAndDraw();
+                return;
+            }
+
+            thr=(int) gd.getNextNumber();
+            gd.getNextNumber();
+            minSize=(int) gd.getNextNumber();
+            maxSize=(int) gd.getNextNumber();
+            excludeOnEdges=gd.getNextBoolean();
+        }
+    }
     
     public void run(String arg) {
         if (IJ.versionLessThan("1.39i")) return;
@@ -94,7 +140,8 @@ public class _3D_objects_counter implements PlugIn, AdjustmentListener, FocusLis
             Prefs.set("3D-OC-Options_redirectTo.string", "none");
             Prefs.set("3D-OC-Options_showMaskedImg.boolean", false);
         }
-        
+
+        /*
         GenericDialog gd=new GenericDialog("3D Object Counter v2.0");
         
         gd.addSlider("Threshold", min, max, thr);
@@ -128,6 +175,13 @@ public class _3D_objects_counter implements PlugIn, AdjustmentListener, FocusLis
         minSize=(int) gd.getNextNumber();
         maxSize=(int) gd.getNextNumber();
         excludeOnEdges=gd.getNextBoolean();
+
+         */
+        if (showDiag) {
+            _3DObjectsCounterDialog diag = new _3DObjectsCounterDialog(imp);
+            diag.initialize(this);
+            showDiag = false;
+        }
         showObj=true;
         showSurf=false;
         showCentro=true;
