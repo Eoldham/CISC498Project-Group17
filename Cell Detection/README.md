@@ -1,4 +1,4 @@
-# Cell Detection
+# celldetection
 
 Image Processing : ImageJ plugin to allow users to count the number of cells in a sampleimage
 
