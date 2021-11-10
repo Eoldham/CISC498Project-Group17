@@ -5,6 +5,11 @@ import ij.WindowManager;
 import ij.plugin.PlugIn;
 import imageJ.plugins.PoorMan3DReg_;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 
 public class CalciumSignal_ implements PlugIn {
 
@@ -32,6 +37,23 @@ public class CalciumSignal_ implements PlugIn {
 
     public static void main(String[] args) {
         // sanity check
-        System.out.println("Hello, world!");
+        // System.out.println("Hello, world!");
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("python", "test.py");
+            processBuilder.redirectErrorStream(true);
+
+            Process process = processBuilder.start();
+            /*
+            BufferedReader bf = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            String line = "";
+            while ((line = bf.readLine()) != null) {
+                System.out.println("" + line);
+            }
+
+             */
+        } catch (IOException ex) {
+            System.out.println("Error.");
+        }
     }
 }
