@@ -2,7 +2,7 @@
 
 # Put the absolute or relative path to the plugins folder of your ImageJ/Fiji installation here.
 # If relative, make sure it's relative to the root directory of this project.
-imageJ=../fiji-win64/Fiji.app/plugins
+imageJ=C:/Users/emold/Desktop/fiji-win64/Fiji.app/plugins
 
 mvn clean package
 cp target/classes/CalciumSignal_.class plugin
