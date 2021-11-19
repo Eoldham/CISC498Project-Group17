@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Put the absolute or relative path to the plugins folder of your ImageJ/Fiji installation here.
+# Put the absolute or relative path to your ImageJ/Fiji installation here.
 # If relative, make sure it's relative to the root directory of this project.
-imageJ=../fiji-win64/Fiji.app/plugins
+imageJ=../fiji-win64/Fiji.app
 
 mvn clean package
 cp target/classes/CalciumSignal_.class plugin
@@ -13,4 +13,5 @@ cp -r target/classes/celldetection plugin
 cd plugin
 jar cvfM CalciumSignal_.jar CalciumSignal_.class CalciumSignal_.java imageJ/plugins/*.class celldetection/*.class celldetection/Objects3D/*.class celldetection/Watershed3D/*.class plugins.config
 cd ..
-cp plugin/CalciumSignal_.jar $imageJ
+cp plugin/CalciumSignal_.jar $imageJ/plugins
+cp test_.py $imageJ/plugins/Scripts
