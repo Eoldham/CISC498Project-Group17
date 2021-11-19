@@ -12,7 +12,7 @@ from scipy.signal import find_peaks, peak_prominences, filtfilt, butter
 def read_csvs():
     cellData = []
     #when we have a folder of, files, read in from directory path
-    path = "/Users/giannabugieda/Desktop/CISC498-Capstone/cell_data/"
+    path = "./cell_data/"
     for filename in os.listdir(path):
         df = pd.read_csv((path+filename))
         cellData.append(df)
