@@ -23,30 +23,12 @@ public class CalciumSignal_ implements PlugIn {
         IJ.showMessage("Calcium Signal", "Welcome to the Calcium Signal plugin!");
 
         try {
-            /*
-            // instance info, owner to executable
-            ProcessBuilder processBuilder = new ProcessBuilder("python", "test_.py");
+            // RELATIVE TO LOCATION OF FIJI EXECUTABLE
+            ProcessBuilder processBuilder = new ProcessBuilder("python", "python/test_.py");
             processBuilder.redirectErrorStream(true);
 
             Process process = processBuilder.start();
-
-             */
-
-
-            // test.py should be in scripts
-            // IJ.run("Scripts/test_.py");
-            // IJ.runMacro("test_.py");
-            /*
-            Runtime run = Runtime.getRuntime();
-            String[] arguments = {"python", "test_.py"};
-            run.exec(arguments);
-            ImageJ ij = IJ.getInstance();
-
-             */
-
-            IJ.log("process started");
         } catch (Exception ex) {
-            // System.out.println("Error.");
             IJ.log(ex.getMessage());
         }
 
@@ -77,7 +59,7 @@ public class CalciumSignal_ implements PlugIn {
         // System.out.println("Hello, world!");
         /*
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder("python", "test.py");
+            ProcessBuilder processBuilder = new ProcessBuilder("python", "test_.py");
             processBuilder.redirectErrorStream(true);
 
             Process process = processBuilder.start();

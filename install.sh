@@ -14,4 +14,4 @@ cd plugin
 jar cvfM CalciumSignal_.jar CalciumSignal_.class CalciumSignal_.java imageJ/plugins/*.class celldetection/*.class celldetection/Objects3D/*.class celldetection/Watershed3D/*.class plugins.config
 cd ..
 cp plugin/CalciumSignal_.jar $imageJ/plugins
-cp test_.py $imageJ/plugins/Scripts
+cp test_.py $imageJ/python

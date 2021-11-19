@@ -1,38 +1,34 @@
 import celldetection._3D_objects_counter;
 import ij.IJ;
+import ij.ImageJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.plugin.PlugIn;
 import imageJ.plugins.PoorMan3DReg_;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 
 
 public class CalciumSignal_ implements PlugIn {
 
     public void run(String arg) {
+        /*
+        System.getProperties().setProperty("plugins.dir", System.getProperty("user.dir")+File.separator+"dist"+ File.separator);
+        ImageJ ij=new ImageJ();
+
+        ij.exitWhenQuitting(true);
+
+         */
+
         IJ.showMessage("Calcium Signal", "Welcome to the Calcium Signal plugin!");
 
         try {
-            /*
-            ProcessBuilder processBuilder = new ProcessBuilder("python", "test.py");
+            // RELATIVE TO LOCATION OF FIJI EXECUTABLE
+            ProcessBuilder processBuilder = new ProcessBuilder("python", "python/test_.py");
             processBuilder.redirectErrorStream(true);
 
             Process process = processBuilder.start();
-
-             */
-            // test.py should be in scripts
-            // IJ.run("Scripts/test_.py");
-            // IJ.runMacro("test_.py");
-            Runtime run = Runtime.getRuntime();
-            String[] arguments = {"python", "test_.py"};
-            run.exec(arguments);
-            IJ.log("process started");
         } catch (Exception ex) {
-            // System.out.println("Error.");
             IJ.log(ex.getMessage());
         }
 
@@ -63,7 +59,7 @@ public class CalciumSignal_ implements PlugIn {
         // System.out.println("Hello, world!");
         /*
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder("python", "test.py");
+            ProcessBuilder processBuilder = new ProcessBuilder("python", "test_.py");
             processBuilder.redirectErrorStream(true);
 
             Process process = processBuilder.start();

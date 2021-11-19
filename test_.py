@@ -7,7 +7,7 @@ root.withdraw()
 
 file_path = filedialog.askopenfilename()
 """
-"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -17,6 +17,5 @@ y = 2*x + 1
 
 plt.plot(x, y)
 plt.show()
-"""
 
-print("Hello, world!")
+#print("Hello, world!")

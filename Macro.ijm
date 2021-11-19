@@ -14,6 +14,4 @@ function processFolder(directory) {
 input = getDirectory("Choose directory.");
 processFolder(input);
 run("Run Calcium Signal...")
-// exec("echo", "python", "test_.py")
-// exec("python", "--version")
 
