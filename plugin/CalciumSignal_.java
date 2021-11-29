@@ -12,19 +12,12 @@ import java.io.*;
 public class CalciumSignal_ implements PlugIn {
 
     public void run(String arg) {
-        /*
-        System.getProperties().setProperty("plugins.dir", System.getProperty("user.dir")+File.separator+"dist"+ File.separator);
-        ImageJ ij=new ImageJ();
-
-        ij.exitWhenQuitting(true);
-
-         */
 
         IJ.showMessage("Calcium Signal", "Welcome to the Calcium Signal plugin!");
 
         try {
             // RELATIVE TO LOCATION OF FIJI EXECUTABLE
-            ProcessBuilder processBuilder = new ProcessBuilder("python", "python/test_.py");
+            ProcessBuilder processBuilder = new ProcessBuilder("python", "pythonscript/peakscript.py");
             processBuilder.redirectErrorStream(true);
 
             Process process = processBuilder.start();

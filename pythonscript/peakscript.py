@@ -7,12 +7,13 @@ import peakutils
 import matplotlib.pyplot as plt
 from scipy.signal import find_peaks, peak_prominences, filtfilt, butter
 
+
 """Reads in all csv files in folder and creates an array of pandas dataframes
    returns array of dfs"""
 def read_csvs():
     cellData = []
     #when we have a folder of, files, read in from directory path
-    path = "./cell_data/"
+    path = "pythonscript/cell_data/"
     for filename in os.listdir(path):
         df = pd.read_csv((path+filename))
         cellData.append(df)
