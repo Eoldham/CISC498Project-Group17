@@ -19,16 +19,10 @@ public class CalciumSignal_ implements PlugIn {
 
         IJ.showMessage("Calcium Signal", "Welcome to the Calcium Signal plugin!");
 
-        try {
-            // RELATIVE TO LOCATION OF FIJI EXECUTABLE
-            ProcessBuilder processBuilder = new ProcessBuilder("python", "pythonscript/peakscript.py");
-            processBuilder.redirectErrorStream(true);
 
-            Process process = processBuilder.start();
-        } catch (Exception ex) {
-            IJ.log(ex.getMessage());
-        }
-
+        /*
+        -- IMAGE REGISTRATION AND EDGE DETECTION --
+         */
         /*
         int imageCount = WindowManager.getImageCount();
         int[] idList = WindowManager.getIDList();
@@ -49,7 +43,27 @@ public class CalciumSignal_ implements PlugIn {
 
          */
 
+
+        /*
+        -- ROI MANAGER --
+         */
         runRoiManager();
+
+
+        /*
+        -- PEAK FINDING --
+         */
+        /*
+        try {
+            // RELATIVE TO LOCATION OF FIJI EXECUTABLE
+            ProcessBuilder processBuilder = new ProcessBuilder("python", "pythonscript/peakscript.py");
+            processBuilder.redirectErrorStream(true);
+
+            Process process = processBuilder.start();
+        } catch (Exception ex) {
+            IJ.log(ex.getMessage());
+        }
+         */
 
     }
 
@@ -60,7 +74,8 @@ public class CalciumSignal_ implements PlugIn {
 
         //Creates New scanner of edgeDetection CSV
         try {
-            String pathName = "C:\\Users\\emold\\Desktop\\CISC498\\CISC498Project-Group17\\src\\main\\java\\Sample.csv";
+            // String pathName = "C:\\Users\\emold\\Desktop\\CISC498\\CISC498Project-Group17\\src\\main\\java\\Sample.csv";
+            String pathName = "data/Sample.csv";
             Scanner scan = new Scanner(new File(pathName));
 
             //Vars
