@@ -14,11 +14,12 @@ import java.util.Scanner;
 import java.io.IOException;
 
 public class CalciumSignal_ implements PlugIn {
+    private final String EDGE_DATA_PATH = "plugins/CalciumSignal/edge_data";
+    private final String PYTHONSCRIPT_PATH = "plugins/CalciumSignal/pythonscript";
 
     public void run(String arg) {
 
         IJ.showMessage("Calcium Signal", "Welcome to the Calcium Signal plugin!");
-
 
         /*
         -- IMAGE REGISTRATION AND EDGE DETECTION --
@@ -52,7 +53,7 @@ public class CalciumSignal_ implements PlugIn {
          */
         try {
             // RELATIVE TO LOCATION OF FIJI EXECUTABLE
-            ProcessBuilder processBuilder = new ProcessBuilder("python", "pythonscript/peakscript.py");
+            ProcessBuilder processBuilder = new ProcessBuilder("python", PYTHONSCRIPT_PATH + "/peakscript.py");
             processBuilder.redirectErrorStream(true);
 
             Process process = processBuilder.start();
@@ -69,7 +70,7 @@ public class CalciumSignal_ implements PlugIn {
 
         //Creates New scanner of edgeDetection CSV
         try {
-            String pathName = "data/Sample.csv";
+            String pathName = EDGE_DATA_PATH + "/Sample.csv";
             Scanner scan = new Scanner(new File(pathName));
 
             //Vars
@@ -123,7 +124,7 @@ public class CalciumSignal_ implements PlugIn {
             rm.runCommand("multi-measure");
 
             //Gets active table and saves
-            String path = "C:\\Users\\emold\\Desktop\\CISC498\\CISC498Project-Group17\\src\\main\\java\\Results.csv";
+            String path = EDGE_DATA_PATH + "/Results.csv";
             ResultsTable results = ij.measure.ResultsTable.getResultsTable();
             try {
                 results.saveAs(path);
