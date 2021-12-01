@@ -74,7 +74,8 @@ public class CalciumSignal_ implements PlugIn {
 
         //Creates New scanner of edgeDetection CSV
         try {
-            String pathName = "C:\\Users\\emold\\Desktop\\CISC498\\CISC498Project-Group17\\src\\main\\java\\Sample.csv";
+            // String pathName = "C:\\Users\\emold\\Desktop\\CISC498\\CISC498Project-Group17\\src\\main\\java\\Sample.csv";
+            String pathName = "data/Sample.csv";
             Scanner scan = new Scanner(new File(pathName));
 
             //Vars
