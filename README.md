@@ -5,7 +5,8 @@ Contributors: Emily Oldham, Sean McMann, Gia Bugieda, Akshat Katoch, Emma Adelma
 
 ## Installation Instructions
 1. Download the jar file and place it in Fiji's *plugins* folder.
-2. Place the installation script inside the *Fiji.app* directory and run it. The script will create the *CalciumSignal* folder within the *plugins* folder. This is where the files used by the program will go.
+2. If necessary, download [Python 3](https://www.python.org/downloads/) for your system. Ensure that ```python``` has been added to PATH (there should be an option to do this during the installation process).
+3. Place the installation script (USER_INSTALL) inside the *Fiji.app* directory and run it. The script will create the *CalciumSignal* folder within the *plugins* folder. This is where the files used by the program will go.
 
 ## Usage
 After launching Fiji, navigate to *Plugins* -> *Calcium Signal* -> *Run Calcium Signal...*.
