@@ -7,13 +7,12 @@ import peakutils
 import matplotlib.pyplot as plt
 from scipy.signal import find_peaks, peak_prominences, filtfilt, butter
 
-
 """Reads in all csv files in folder and creates an array of pandas dataframes
    returns array of dfs"""
 def read_csvs():
     cellData = []
     #when we have a folder of, files, read in from directory path
-    path = "plugins/CalciumSignal/pythonscript/cell_data/"
+    path = "./cell_data/"
     for filename in os.listdir(path):
         df = pd.read_csv((path+filename))
         cellData.append(df)
@@ -63,7 +62,7 @@ Calls findNormalizedBase to find baseline of smoothed data
 """
 def smoothDataPoints(normalBase, df):
     data = df["Mean1"].values.tolist()
-    c, d = butter(3, 0.3, 'lowpass')
+    c, d = butter(3, 0.1, 'lowpass') #.3 for less smoothed data
     filteredLowPass = filtfilt(c, d, data)
     newbase = peakutils.baseline(filteredLowPass, math.floor(normalBase))
     findNormalizedBase(filteredLowPass-newbase,df)
@@ -89,6 +88,28 @@ def plotOriginalCellData(y):
     plt.show()
 
 
+def matchRefinedPeakToActualPeak(peaks, originalData):
+    # since data was smoothed when peaks were detected, look for highest point around frame
+    # where peak was detected in the original data based on an error deviation
+    peakIndices = []
+    for peak in peaks:
+        highPointIndex = peak
+        for value in range(peak - 30, peak + 30):
+            if originalData[value] > originalData[highPointIndex]:
+                highPointIndex = value
+        peakIndices.append(highPointIndex)
+    return peakIndices
+
+def plotPeaksOnOriginalData(peaks,data):
+    plt.figure()
+    plt.title("Original Calcium Intensity Over Time with Peaks")
+    plt.xlabel("Video Frame (#)")
+    plt.ylabel("Calcium Intensity")
+    plt.plot(data)
+    for idx in peaks:
+        plt.plot(idx, data[idx],"x")
+    plt.show()
+
 def main():
     #read in files
     cellDataList = read_csvs()
@@ -105,8 +126,12 @@ def main():
         refinedData = smoothedData - smoothedBase
 
         peaks, properties = find_peaks(refinedData, prominence=(5))
+        print(peaks)
         plotOriginalCellData(originalIntensities)
         plotPeakCellData(peaks,refinedData,cell)
+        print(originalIntensities)
+        peakIndices = matchRefinedPeakToActualPeak(peaks,originalIntensities)
+        plotPeaksOnOriginalData(peakIndices,originalIntensities)
 
 
 if __name__ == "__main__":
