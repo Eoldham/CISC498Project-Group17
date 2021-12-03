@@ -7,6 +7,9 @@ import peakutils
 import matplotlib.pyplot as plt
 from scipy.signal import find_peaks, peak_prominences, filtfilt, butter
 
+
+plot_path = "plugins/CalciumSignal/pythonscript/"
+
 """Reads in all csv files in folder and creates an array of pandas dataframes
    returns array of dfs"""
 def read_csvs():
@@ -14,9 +17,16 @@ def read_csvs():
     #when we have a folder of, files, read in from directory path
     path = "./cell_data/"
     for filename in os.listdir(path):
+        print(path+filename)
         df = pd.read_csv((path+filename))
+        df = df.filter(regex="Mean")
         cellData.append(df)
     return cellData
+
+def read_data_from_csv():
+    cellData = []
+    # when we have a folder of, files, read in from directory path
+    path = "./cell_data/"
 
 
 """Finds first rough baseline from data
@@ -108,7 +118,9 @@ def plotPeaksOnOriginalData(peaks,data):
     plt.plot(data)
     for idx in peaks:
         plt.plot(idx, data[idx],"x")
-    plt.show()
+    #plt.show()
+    plotName = "cell" + cellnum + "_peak_plot.png"
+    plt.savefig(plot_path + "/peak_plots/" + plotName)
 
 def main():
     #read in files
@@ -128,8 +140,8 @@ def main():
         peaks, properties = find_peaks(refinedData, prominence=(5))
         print(peaks)
         plotOriginalCellData(originalIntensities)
-        plotPeakCellData(peaks,refinedData,cell)
-        print(originalIntensities)
+        #plotPeakCellData(peaks,refinedData,cell)
+        #print(originalIntensities)
         peakIndices = matchRefinedPeakToActualPeak(peaks,originalIntensities)
         plotPeaksOnOriginalData(peakIndices,originalIntensities)
 
