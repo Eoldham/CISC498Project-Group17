@@ -3,9 +3,9 @@ import sys
 import subprocess
 
 
-# Assuming we are in user's Fiji.app directory
+# Assuming we are in user's Fiji.app directory, inside an unzipped folder called CS_files
 print("Creating plugins/CalciumSignal directory...\n")
-base = "plugins/CalciumSignal"
+base = "../plugins/CalciumSignal"
 os.mkdir(base)
 print("Done.\n")
 
@@ -18,7 +18,7 @@ os.mkdir(celldata)
 
 os.rename("peakscript.py", os.path.join(pythonscript, "peakscript.py"))
 
-subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r' 'requirments.txt'])
+subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r' 'requirements.txt'])
 
 print("Done.\n")
 
