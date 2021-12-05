@@ -13,3 +13,7 @@ After launching Fiji, navigate to *Plugins* -> *Calcium Signal* -> *Run Calcium 
 Allow a few moments for the image registration and edge detection to complete. Then, make corrections as needed in the ROI Manager dialogue.
 
 After this is done, the peak analysis phase will begin. Choose a folder to export the completed data to.
+
+
+## Credits
+PoorMan3DReg by Michael Liebling
