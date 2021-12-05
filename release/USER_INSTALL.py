@@ -9,6 +9,11 @@ base = "../plugins/CalciumSignal"
 os.mkdir(base)
 print("Done.\n")
 
+# Putting the jar file in the right place
+print("Installing jar file...\n")
+os.rename("CalciumSignal_.jar", "../plugins/CalciumSignal_.jar")
+print("Done.\n")
+
 # Directories needed by peak finding script
 print("Setting up Python environment...\n")
 pythonscript = os.path.join(base, "pythonscript")
