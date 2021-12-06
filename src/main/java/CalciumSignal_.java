@@ -51,7 +51,8 @@ public class CalciumSignal_ implements PlugIn {
         /*
         -- ROI MANAGER --
          */
-//        //Gets active table and saves
+
+        //Gets active table and saves
         String path = EDGE_DATA_PATH + "/edgeDetectResults.csv";
         ResultsTable results = ij.measure.ResultsTable.getResultsTable();
 
@@ -60,7 +61,8 @@ public class CalciumSignal_ implements PlugIn {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        WindowManager.removeWindow(WindowManager.getFrontWindow());
+        WindowManager.removeWindow(WindowManager.getFrontWindow());
         WindowManager.toFront(roiWindow);
 
         runRoiManager();
@@ -135,7 +137,8 @@ public class CalciumSignal_ implements PlugIn {
         }
 
         //Makes Roi's visible in roi Manager
-        rm.runCommand("show all with labels");
+        //rm.runCommand("show all with labels");
+        rm.runCommand("show all");
 
 
         NonBlockingGenericDialog message =  new NonBlockingGenericDialog("Done editing cells");
@@ -154,9 +157,9 @@ public class CalciumSignal_ implements PlugIn {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
 
-        //ResultsTable resultsTable = rm.multiMeasure(imp);
+            rm.close();
+        }
 
     }
 
