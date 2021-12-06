@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from scipy.signal import find_peaks, peak_prominences, filtfilt, butter
 
 
+
 """Reads in all csv files in folder and creates an array of pandas dataframes
    returns array of dfs"""
 def read_csvs():
@@ -15,9 +16,12 @@ def read_csvs():
     #when we have a folder of, files, read in from directory path
     path = "plugins/CalciumSignal/pythonscript/cell_data/"
     for filename in os.listdir(path):
+        print(path+filename)
         df = pd.read_csv((path+filename))
-        cellData.append(df)
-    return cellData
+        df = df.filter(regex="Mean")
+        #cellData.append(df)
+    return df
+
 
 
 """Finds first rough baseline from data
@@ -29,9 +33,9 @@ def findBaseline(avg, intensities, cellDf):
             intensities.remove(elem)
     base = sum(intensities) / len(intensities)
     cellDf['baseline'] = base
-
-
     return (base)
+
+
 
 """Creates a new df column with normalized data"""
 """TODO: maybe later changed so can use findBaseline function instead"""
@@ -48,22 +52,24 @@ def findNormalizedBase(ndata, df):
     df['normalbaseline'] = newBase
 
 
+
 """ONLY USE WHEN NOT SMOOTHING THE DATA"""
 """Normalizes the baseline for the original data"""
-def normalizeData(base1, df):
-    y = df["Mean1"] #list of intensities
+def normalizeData(base1, df, cellMean):
+    y = df[cellMean] #list of intensities
     base2 = peakutils.baseline(y, math.floor(base1))
     normalizedData = y - base2
     #print(normalizedData)
     findNormalizedBase(normalizedData, df) #new normbaseline column created
     return base2
 
+
 """Smooths data points so signal is more clean
 Calls findNormalizedBase to find baseline of smoothed data
 """
-def smoothDataPoints(normalBase, df):
-    data = df["Mean1"].values.tolist()
-    c, d = butter(3, 0.3, 'lowpass')
+def smoothDataPoints(normalBase, df, cellMean):
+    data = df[cellMean].values.tolist()
+    c, d = butter(3, 0.1, 'lowpass') #.3 for less smoothed data
     filteredLowPass = filtfilt(c, d, data)
     newbase = peakutils.baseline(filteredLowPass, math.floor(normalBase))
     findNormalizedBase(filteredLowPass-newbase,df)
@@ -78,7 +84,7 @@ def plotPeakCellData(x,y,df):
     plt.plot(y)
     plt.plot(x,y[x],"x")
     plt.plot(df["normalbaseline"],color='red',label="baseline")
-    plt.show()
+   # plt.show()
 
 def plotOriginalCellData(y):
     plt.figure()
@@ -86,27 +92,67 @@ def plotOriginalCellData(y):
     plt.xlabel("Video Frame (#)")
     plt.ylabel("Calcium Intensity")
     plt.plot(y)
-    plt.show()
+    #plt.show()
+
+
+def matchRefinedPeakToActualPeak(peaks, originalData):
+    # since data was smoothed when peaks were detected, look for highest point around frame
+    # where peak was detected in the original data based on an error deviation
+    peakIndices = []
+    for peak in peaks:
+        highPointIndex = peak
+        for value in range(peak - 30, peak + 30):
+            if originalData[value] > originalData[highPointIndex]:
+                highPointIndex = value
+        peakIndices.append(highPointIndex)
+    return peakIndices
+
+
+
+def plotPeaksOnOriginalData(peaks,data,cellnum):
+    plt.figure()
+    plt.title("Original Calcium Intensity Over Time with Peaks")
+    plt.xlabel("Video Frame (#)")
+    plt.ylabel("Calcium Intensity")
+    plt.plot(data)
+    for idx in peaks:
+        plt.plot(idx, data[idx],"x")
+        
+    plotName = "cell" + str(cellnum) + "_peak_plot.png"
+    path = "plugins/CalciumSignal/pythonscript/cell_data/" + plotName
+    plt.savefig(path, format="png")
+    #plt.show()
+
 
 
 def main():
     #read in files
-    cellDataList = read_csvs()
-    for cell in cellDataList:
-        videoFrames = len(cell)
-        average = cell.Mean1.mean()
-        originalIntensities = cell["Mean1"].values.tolist()
+    cellData = read_csvs()
+    #cellDataList = cellDataList.columns
+    print(cellData)
+    cellID = 1
+
+    for cell in cellData.columns:
+        #cellMean = "Mean" + str(cellID)
+        videoFrames = len(cellData)
+        average = cellData[cell].mean()
+        originalIntensities = cellData[cell].values.tolist()
         # find baseline
-        firstBaseline = findBaseline(average, list(originalIntensities), cell)
+        firstBaseline = findBaseline(average, list(originalIntensities), cellData)
         #normalize Data - don't need to use for now
-        #normalBase = normalizeData(firstBaseline, cell)
-        smoothedData, smoothedBase = smoothDataPoints(firstBaseline,cell)
+        #normalBase = normalizeData(firstBaseline, cell, cellMean)
+        smoothedData, smoothedBase = smoothDataPoints(firstBaseline,cellData,cell)
         #plot graph
         refinedData = smoothedData - smoothedBase
 
         peaks, properties = find_peaks(refinedData, prominence=(5))
+        print(peaks)
         plotOriginalCellData(originalIntensities)
-        plotPeakCellData(peaks,refinedData,cell)
+        #plotPeakCellData(peaks,refinedData,cell)
+        #print(originalIntensities)
+        peakIndices = matchRefinedPeakToActualPeak(peaks,originalIntensities)
+        plotPeaksOnOriginalData(peakIndices,originalIntensities,cellID)
+        cellID += 1
 
 
 if __name__ == "__main__":
