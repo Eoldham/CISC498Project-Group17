@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 from scipy.signal import find_peaks, peak_prominences, filtfilt, butter
 
 
-#plot_path = "/PycharmProjects/pythonProject/"
 
 """Reads in all csv files in folder and creates an array of pandas dataframes
    returns array of dfs"""
@@ -34,9 +33,8 @@ def findBaseline(avg, intensities, cellDf):
             intensities.remove(elem)
     base = sum(intensities) / len(intensities)
     cellDf['baseline'] = base
-
-
     return (base)
+
 
 
 """Creates a new df column with normalized data"""
@@ -109,6 +107,8 @@ def matchRefinedPeakToActualPeak(peaks, originalData):
         peakIndices.append(highPointIndex)
     return peakIndices
 
+
+
 def plotPeaksOnOriginalData(peaks,data,cellnum):
     plt.figure()
     plt.title("Original Calcium Intensity Over Time with Peaks")
@@ -117,9 +117,12 @@ def plotPeaksOnOriginalData(peaks,data,cellnum):
     plt.plot(data)
     for idx in peaks:
         plt.plot(idx, data[idx],"x")
-    #plt.show()
+        
     plotName = "cell" + str(cellnum) + "_peak_plot.png"
-    plt.savefig(plotName)
+    plt.savefig(plotName, format="png")
+    #plt.show()
+
+
 
 def main():
     #read in files
@@ -134,7 +137,7 @@ def main():
         average = cellData[cell].mean()
         originalIntensities = cellData[cell].values.tolist()
         # find baseline
-        firstBaseline = findBaseline(average, list(originalIntensities), cellData[cell])
+        firstBaseline = findBaseline(average, list(originalIntensities), cellData)
         #normalize Data - don't need to use for now
         #normalBase = normalizeData(firstBaseline, cell, cellMean)
         smoothedData, smoothedBase = smoothDataPoints(firstBaseline,cellData,cell)
