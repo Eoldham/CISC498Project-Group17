@@ -110,7 +110,7 @@ def matchRefinedPeakToActualPeak(peaks, originalData):
         peakIndices.append(highPointIndex)
     return peakIndices
 
-def plotPeaksOnOriginalData(peaks,data):
+def plotPeaksOnOriginalData(peaks,data,cellnum):
     plt.figure()
     plt.title("Original Calcium Intensity Over Time with Peaks")
     plt.xlabel("Video Frame (#)")
@@ -125,6 +125,7 @@ def plotPeaksOnOriginalData(peaks,data):
 def main():
     #read in files
     cellDataList = read_csvs()
+    cellID = 1
     for cell in cellDataList:
         videoFrames = len(cell)
         average = cell.Mean1.mean()
@@ -143,7 +144,8 @@ def main():
         #plotPeakCellData(peaks,refinedData,cell)
         #print(originalIntensities)
         peakIndices = matchRefinedPeakToActualPeak(peaks,originalIntensities)
-        plotPeaksOnOriginalData(peakIndices,originalIntensities)
+        plotPeaksOnOriginalData(peakIndices,originalIntensities,cellID)
+        cellID += 1
 
 
 if __name__ == "__main__":
