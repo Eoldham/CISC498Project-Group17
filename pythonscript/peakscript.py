@@ -14,7 +14,7 @@ from scipy.signal import find_peaks, peak_prominences, filtfilt, butter
 def read_csvs():
     cellData = []
     #when we have a folder of, files, read in from directory path
-    path = "./cell_data/"
+    path = "plugins/CalciumSignal/pythonscript/cell_data/"
     for filename in os.listdir(path):
         print(path+filename)
         df = pd.read_csv((path+filename))
@@ -119,7 +119,8 @@ def plotPeaksOnOriginalData(peaks,data,cellnum):
         plt.plot(idx, data[idx],"x")
         
     plotName = "cell" + str(cellnum) + "_peak_plot.png"
-    plt.savefig(plotName, format="png")
+    path = "plugins/CalciumSignal/pythonscript/cell_data/" + plotName
+    plt.savefig(path, format="png")
     #plt.show()
 
 

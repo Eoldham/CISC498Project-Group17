@@ -7,8 +7,13 @@ import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Roi;
 import ij.measure.ResultsTable;
 import ij.plugin.PlugIn;
+import ij.plugin.filter.Analyzer;
 import ij.plugin.frame.RoiManager;
+import ij.text.TextPanel;
+import ij.text.TextWindow;
 import imageJ.plugins.PoorMan3DReg_;
+
+import java.awt.*;
 import java.io.*;
 import java.util.Scanner;
 import java.io.IOException;
@@ -20,6 +25,7 @@ public class CalciumSignal_ implements PlugIn {
     public void run(String arg) {
 
         IJ.showMessage("Calcium Signal", "Welcome to the Calcium Signal plugin!");
+        Frame roiWindow = WindowManager.getCurrentWindow();
 
         /*
         -- IMAGE REGISTRATION AND EDGE DETECTION --
@@ -45,6 +51,20 @@ public class CalciumSignal_ implements PlugIn {
         /*
         -- ROI MANAGER --
          */
+
+        //Gets active table and saves
+        String path = EDGE_DATA_PATH + "/edgeDetectResults.csv";
+        ResultsTable results = ij.measure.ResultsTable.getResultsTable();
+
+        try {
+            results.saveAs(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        WindowManager.removeWindow(WindowManager.getFrontWindow());
+        WindowManager.removeWindow(WindowManager.getFrontWindow());
+        WindowManager.toFront(roiWindow);
+
         runRoiManager();
 
 
@@ -70,7 +90,7 @@ public class CalciumSignal_ implements PlugIn {
 
         //Creates New scanner of edgeDetection CSV
         try {
-            String pathName = EDGE_DATA_PATH + "/Sample.csv";
+            String pathName = EDGE_DATA_PATH + "/edgeDetectResults.csv";
             Scanner scan = new Scanner(new File(pathName));
 
             //Vars
@@ -80,7 +100,7 @@ public class CalciumSignal_ implements PlugIn {
             double height;
             String line;
             String splitLine[];
-            int cornerDiameter = 5;
+            int cornerDiameter = 20;
 
             //Skips first line
             scan.nextLine();
@@ -89,14 +109,19 @@ public class CalciumSignal_ implements PlugIn {
                 line = scan.nextLine();
                 splitLine = line.split("[,]");
 
-                int fixer = 0;
-                //int fixer = 10
+                //int fixer = 0;
+                int fixer = 10;
 
                 //Set all necessary vars
-                x = Double.parseDouble(splitLine[3])  - fixer;
-                y = Double.parseDouble(splitLine[4]) - fixer;
-                width = Double.parseDouble(splitLine[6]);
-                height = Double.parseDouble(splitLine[7]);
+//                x = Double.parseDouble(splitLine[4])  - fixer;
+//                y = Double.parseDouble(splitLine[5]) - fixer;
+//                width = Double.parseDouble(splitLine[7]);
+//                height = Double.parseDouble(splitLine[8]);
+
+                    x = Double.parseDouble(splitLine[12])  - fixer;
+                    y = Double.parseDouble(splitLine[13]) - fixer;
+                    width = Double.parseDouble(splitLine[24]);
+                    height = Double.parseDouble(splitLine[25]);
 
                 //Create ROI with Input: int x, int y, int width, int height, int cornerDiameter
                 Roi roi = new Roi((int)x, (int)y, (int)width, (int)height, cornerDiameter);
@@ -112,7 +137,8 @@ public class CalciumSignal_ implements PlugIn {
         }
 
         //Makes Roi's visible in roi Manager
-        rm.runCommand("show all with labels");
+        //rm.runCommand("show all with labels");
+        rm.runCommand("show all");
 
 
         NonBlockingGenericDialog message =  new NonBlockingGenericDialog("Done editing cells");
@@ -124,18 +150,16 @@ public class CalciumSignal_ implements PlugIn {
             rm.runCommand("multi-measure");
 
             //Gets active table and saves
-            String path = EDGE_DATA_PATH + "/Results.csv";
+            String path = PYTHONSCRIPT_PATH + "/cell_data/realResults.csv";
             ResultsTable results = ij.measure.ResultsTable.getResultsTable();
             try {
                 results.saveAs(path);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            rm.close();
         }
-
-
-
-        //ResultsTable resultsTable = rm.multiMeasure(imp);
 
     }
 
