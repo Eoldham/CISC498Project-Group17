@@ -6,6 +6,7 @@ import ij.measure.*;
 import ij.process.*;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.*;
 
 
@@ -760,10 +761,12 @@ public class Counter3D {
         }
         
         if (newRT){
-            rt.show("Statistics for "+title);
+            rt.show("Results");
+            //rt.show("Statistics for "+title);
         }else{
             rt.show("Results");
         }
+
     }
     
     /** Returns a summary containing the image name and the number of retrieved objects including the set filter size and threshold.
