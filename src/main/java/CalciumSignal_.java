@@ -77,8 +77,18 @@ public class CalciumSignal_ implements PlugIn {
             processBuilder.redirectErrorStream(true);
 
             Process process = processBuilder.start();
+            BufferedReader errout = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            String line;
+            while ((line = errout.readLine()) != null) {
+                IJ.log(line);
+            }
+            BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line2;
+            while ((line2 = input.readLine()) != null) {
+                IJ.log(line2);
+            }
         } catch (Exception ex) {
-            IJ.log(ex.getMessage());
+            IJ.log("error");
         }
 
     }
