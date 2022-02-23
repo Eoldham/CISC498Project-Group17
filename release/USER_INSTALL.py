@@ -8,10 +8,6 @@ base = "../plugins/CalciumSignal"
 os.mkdir(base)
 print("Done.\n")
 
-# Also create edge_data folder
-print("Creating plugins/CalciumSignal/edge_data directory...\n")
-os.mkdir(os.path.join(base, "edge_data")
-
 # Putting the jar file in the right place
 print("Installing jar file...\n")
 os.rename("CalciumSignal_.jar", "../plugins/CalciumSignal_.jar")

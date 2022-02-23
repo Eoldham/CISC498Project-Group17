@@ -72,23 +72,62 @@ public class CalciumSignal_ implements PlugIn {
         -- PEAK FINDING --
          */
         try {
+            // Attempt to find the preferred command or path for python 3
+            String systemPath = System.getenv("PATH");
+            String[] pathLines = systemPath.split(":");
+            String exePath = "python";
+            String os = System.getProperty("os.name");
+
+            if (os.contains("Windows")) {
+                for (String entry : pathLines) {
+                    boolean pyPath = entry.contains("python") || entry.contains("python3");
+
+                    if (pyPath) {
+                        if (entry.contains("python3")) {
+                            exePath = entry.substring(entry.indexOf(System.getProperty("file.separator")) + 1);
+                        }
+                    }
+                }
+            } else {
+                String[] bin = new File("/usr/bin").list();
+                for (String cmdName : bin) {
+                    if (cmdName.equals("python") || cmdName.equals("python3")) {
+                        exePath = cmdName;
+                    }
+                }
+                String[] local = new File("/usr/local/bin").list();
+                for (String cmdName : local) {
+                    if (cmdName.equals("python") || cmdName.equals("python3")) {
+                        // Prefer local distribution (/usr/local/bin)...use full path
+                        exePath = "/usr/local/bin/" + cmdName;
+                    }
+                }
+            }
+
             // RELATIVE TO LOCATION OF FIJI EXECUTABLE
-            ProcessBuilder processBuilder = new ProcessBuilder("python", PYTHONSCRIPT_PATH + "/peakscript.py");
+            ProcessBuilder processBuilder = new ProcessBuilder(exePath, PYTHONSCRIPT_PATH + "/peakscript.py");
             processBuilder.redirectErrorStream(true);
 
             Process process = processBuilder.start();
             BufferedReader errout = new BufferedReader(new InputStreamReader(process.getErrorStream()));
             String line;
+
             while ((line = errout.readLine()) != null) {
                 IJ.log(line);
             }
+
+            /*
+            // Use for debugging only
             BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line2;
+
             while ((line2 = input.readLine()) != null) {
                 IJ.log(line2);
             }
+             */
+
         } catch (Exception ex) {
-            IJ.log("error");
+            IJ.log(ex.getMessage());
         }
 
     }
