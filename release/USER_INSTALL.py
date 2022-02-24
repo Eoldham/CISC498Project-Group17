@@ -2,7 +2,6 @@ import os
 import sys
 import subprocess
 
-
 # Assuming we are in user's Fiji.app directory, inside an unzipped folder called CS_files
 print("Creating plugins/CalciumSignal directory...\n")
 base = "../plugins/CalciumSignal"
