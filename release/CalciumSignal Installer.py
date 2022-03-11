@@ -1,3 +1,4 @@
+
 import tkinter as tk
 from tkinter import ttk
 from tkinter import font as tkfont
@@ -12,7 +13,13 @@ class CalciumSignalWizard(tk.Tk):
             tk.Tk.__init__(self, *args, **kwargs)
 
             self.title("CalciumSignal Installer")
-            self.geometry("400x140")
+
+            # the geometry function seems to be measured differently on unix
+            if sys.platform == "win32" or sys.platform == "cygwin":
+                self.geometry("390x140")
+            else:
+                self.geometry("430x140")
+
             self.eval('tk::PlaceWindow %s center' % self.winfo_toplevel())
 
             container = tk.Frame(self)
@@ -76,7 +83,34 @@ class PageOne(tk.Frame):
         self.update()
         time.sleep(0.5)
 
+        self.label.configure(text="Creating plugins/CalciumSignal directory...")
+        self.update_idletasks()
+
         base = os.path.join("..", "plugins", "CalciumSignal")
+
+        try:
+            os.mkdir(base)
+        except FileExistsError:
+            pass
+
+        time.sleep(0.5)
+        self.progress['value'] = 25
+        self.update()
+
+        self.label.configure(text="Installing jar file...")
+        self.update_idletasks()
+
+        try:
+            os.replace("CalciumSignal_.jar", os.path.join("..", "plugins", "CalciumSignal_.jar"))
+        except FileNotFoundError:
+            self.label.configure(text="Could not find CalciumSignal_.jar.\nBe sure that it is inside the release folder and try again.")
+            self.update_idletasks()
+            return
+
+        time.sleep(0.5)
+        self.progress['value'] = 50
+        self.update()
+
         self.label.configure(text="Setting up Python environment...")
         self.update_idletasks()
 
@@ -101,32 +135,6 @@ class PageOne(tk.Frame):
             os.replace("peakscript.py", os.path.join(pythonscript, "peakscript.py"))
         except FileNotFoundError:
             self.label.configure(text="Could not find peakscript.py.\nBe sure that it is inside the release folder and try again.")
-            self.update_idletasks()
-            return
-
-        time.sleep(0.5)
-        self.progress['value'] = 25
-        self.update()
-
-        self.label.configure(text="Creating plugins/CalciumSignal directory...")
-        self.update_idletasks()
-
-        try:
-            os.mkdir(base)
-        except FileExistsError:
-            pass
-
-        time.sleep(0.5)
-        self.progress['value'] = 50
-        self.update()
-
-        self.label.configure(text="Installing jar file...")
-        self.update_idletasks()
-
-        try:
-            os.replace("CalciumSignal_.jar", os.path.join("..", "plugins", "CalciumSignal_.jar"))
-        except FileNotFoundError:
-            self.label.configure(text="Could not find CalciumSignal_.jar.\nBe sure that it is inside the release folder and try again.")
             self.update_idletasks()
             return
 
