@@ -116,8 +116,8 @@ public class CalciumSignal_ implements PlugIn {
                 IJ.log(line);
             }
 
-            /*
             // Use for debugging only
+            /*
             BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line2;
 
