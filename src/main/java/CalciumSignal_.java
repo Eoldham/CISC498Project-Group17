@@ -126,6 +126,7 @@ public class CalciumSignal_ implements PlugIn {
             }
              */
 
+
         } catch (Exception ex) {
             IJ.log(ex.getMessage());
         }

@@ -5,6 +5,7 @@ import csv
 import os
 import peakutils
 import matplotlib.pyplot as plt
+import matplotlib
 from scipy.signal import find_peaks, peak_prominences, filtfilt, butter
 
 
@@ -16,13 +17,18 @@ def read_csvs():
     #when we have a folder of, files, read in from directory path
     path = "plugins/CalciumSignal/pythonscript/cell_data/"
     for filename in os.listdir(path):
-        print(path+filename)
-        df = pd.read_csv((path+filename))
+        #print(path+filename)
+        df = pd.read_csv(os.path.join(path, filename))
         df = df.filter(regex="Mean")
         #cellData.append(df)
     return df
 
-
+"""Stores all relevant graph data to a csv for the ImageJ plugin to use"""
+def write_csv(df):
+    #when we have a folder of, files, read in from directory path
+    path = "plugins/CalciumSignal/pythonscript/cell_data/"
+    df.to_csv(os.path.join(path, "graph_data.csv"))
+    return
 
 """Finds first rough baseline from data
    Looks at all elements below the average and averages them
@@ -110,7 +116,8 @@ def matchRefinedPeakToActualPeak(peaks, originalData):
 
 
 def plotPeaksOnOriginalData(peaks,data,cellnum):
-    plt.figure()
+    matplotlib.use("Agg")
+    fig = plt.figure()
     plt.title("Original Calcium Intensity Over Time with Peaks")
     plt.xlabel("Video Frame (#)")
     plt.ylabel("Calcium Intensity")
@@ -121,6 +128,10 @@ def plotPeaksOnOriginalData(peaks,data,cellnum):
     plotName = "cell" + str(cellnum) + "_peak_plot.png"
     path = "plugins/CalciumSignal/pythonscript/cell_data/" + plotName
     plt.savefig(path, format="png")
+    fig.clear()
+    plt.close()
+    plt.cla()
+    plt.clf()
     #plt.show()
 
 
@@ -153,6 +164,8 @@ def main():
         peakIndices = matchRefinedPeakToActualPeak(peaks,originalIntensities)
         plotPeaksOnOriginalData(peakIndices,originalIntensities,cellID)
         cellID += 1
+
+    write_csv(cellData)
 
 
 if __name__ == "__main__":
