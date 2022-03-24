@@ -30,6 +30,17 @@ def write_csv(df):
     df.to_csv(os.path.join(path, "graph_data.csv"))
     return
 
+""" Stores peak locations at the correct frame # in dataframe.
+If there is a peak, value will be 1, if no peak detected, value is -1."""
+def writePeaksToDf(peakIndx,df, cellnum):
+    peaks = [-1] * len(df)
+    colName = "Cell" + str(cellnum) + "_Peaks"
+    for peakFrame in peakIndx:
+        peaks[peakFrame] = 1
+    newDf = df.copy()
+    newDf[colName] = peaks
+    return newDf
+
 """Finds first rough baseline from data
    Looks at all elements below the average and averages them
    returns the base"""
@@ -163,6 +174,7 @@ def main():
         #print(originalIntensities)
         peakIndices = matchRefinedPeakToActualPeak(peaks,originalIntensities)
         plotPeaksOnOriginalData(peakIndices,originalIntensities,cellID)
+        cellData = writePeaksToDf(peakIndices,cellData,cellID)
         cellID += 1
 
     write_csv(cellData)
