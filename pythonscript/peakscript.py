@@ -14,13 +14,12 @@ from scipy.signal import find_peaks, peak_prominences, filtfilt, butter
    returns array of dfs"""
 def read_csvs():
     cellData = []
-    #when we have a folder of, files, read in from directory path
+    # when we have a folder of, files, read in from directory path
+    filename = "realResults.csv" #file outputted by ROI manager
     path = "plugins/CalciumSignal/pythonscript/cell_data/"
-    for filename in os.listdir(path):
-        #print(path+filename)
-        df = pd.read_csv(os.path.join(path, filename))
-        df = df.filter(regex="Mean")
-        #cellData.append(df)
+    df = pd.read_csv((path + filename))
+    df = df.filter(regex="Mean")
+    df = df.dropna(axis="columns")  ##eliminate columns with NaN values
     return df
 
 """Stores all relevant graph data to a csv for the ImageJ plugin to use"""
