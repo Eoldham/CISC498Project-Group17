@@ -6,6 +6,7 @@ import os
 import peakutils
 import matplotlib.pyplot as plt
 import matplotlib
+import sys
 from scipy.signal import find_peaks, peak_prominences, filtfilt, butter
 
 
@@ -102,13 +103,13 @@ def plotPeakCellData(x,y,df):
     plt.plot(df["normalbaseline"],color='red',label="baseline")
    # plt.show()
 
-def plotOriginalCellData(y):
-    plt.figure()
+def plotOriginalCellData(y, figure):
+    # plt.figure()
     plt.title("Original Calcium Intensity Over Time")
     plt.xlabel("Video Frame (#)")
     plt.ylabel("Calcium Intensity")
-    plt.plot(y)
-    #plt.show()
+    figure.gca().plot(y)
+    # plt.show()
 
 
 def matchRefinedPeakToActualPeak(peaks, originalData):
@@ -124,35 +125,119 @@ def matchRefinedPeakToActualPeak(peaks, originalData):
     return peakIndices
 
 
-
-def plotPeaksOnOriginalData(peaks,data,cellnum):
-    matplotlib.use("Agg")
-    fig = plt.figure()
+"""
+def plotPeaksOnOriginalData(peaks,data,cellnum,fig):
+    # matplotlib.use("Agg")
+    # fig = plt.figure()
     plt.title("Original Calcium Intensity Over Time with Peaks")
     plt.xlabel("Video Frame (#)")
     plt.ylabel("Calcium Intensity")
-    plt.plot(data)
+    #plt.plot(data)
+    fig.gca().plot(idx, data[idx],"x")
     for idx in peaks:
-        plt.plot(idx, data[idx],"x")
-        
+        fig.gca().plot(idx, data[idx],"x")
+        #plt.plot(idx, data[idx],"x")
+
+    """"""
     plotName = "cell" + str(cellnum) + "_peak_plot.png"
     path = "plugins/CalciumSignal/pythonscript/cell_data/" + plotName
     plt.savefig(path, format="png")
-    fig.clear()
-    plt.close()
-    plt.cla()
-    plt.clf()
-    #plt.show()
+    """"""
 
+    plt.show()
+    return fig
+"""
 
+# fig = None
+cellData = read_csvs()
+cellID = 1
+fig = plt.figure()
 
 def main():
+    sys.stdout = open('output.txt', 'w')
     #read in files
-    cellData = read_csvs()
+    #cellData = read_csvs()
     #cellDataList = cellDataList.columns
-    print(cellData)
-    cellID = 1
+    #print(cellData)
+    #cellID = 1
+    # global fig
+    global cellData
+    global cellID
+    # fig, ax = plt.subplots()
 
+    def plotPeaksOnOriginalData(peaks,data,cellnum,figure):
+        # matplotlib.use("Agg")
+        # fig = plt.figure()
+        plt.title("Original Calcium Intensity Over Time with Peaks")
+        plt.xlabel("Video Frame (#)")
+        plt.ylabel("Calcium Intensity")
+        #plt.plot(data)
+        for idx in peaks:
+            figure.gca().plot(idx, data[idx],"x")
+            # plt.show()
+            #plt.plot(idx, data[idx],"x")
+
+        """
+        plotName = "cell" + str(cellnum) + "_peak_plot.png"
+        path = "plugins/CalciumSignal/pythonscript/cell_data/" + plotName
+        plt.savefig(path, format="png")
+        """
+
+        plt.show()
+
+    def plot_cell(cellData, figure):
+        #cellMean = "Mean" + str(cellID)
+        global cellID
+        cell = cellData.columns[cellID]
+        videoFrames = len(cellData)
+        average = cellData[cell].mean()
+        originalIntensities = cellData[cell].values.tolist()
+        # find baseline
+        firstBaseline = findBaseline(average, list(originalIntensities), cellData)
+        #normalize Data - don't need to use for now
+        #normalBase = normalizeData(firstBaseline, cell, cellMean)
+        smoothedData, smoothedBase = smoothDataPoints(firstBaseline,cellData,cell)
+        #plot graph
+        refinedData = smoothedData - smoothedBase
+
+        peaks, properties = find_peaks(refinedData, prominence=(5))
+        #print(peaks)
+        plotOriginalCellData(originalIntensities, figure)
+        #plotPeakCellData(peaks,refinedData,cell)
+        #print(originalIntensities)
+        peakIndices = matchRefinedPeakToActualPeak(peaks,originalIntensities)
+        plotPeaksOnOriginalData(peakIndices,originalIntensities,cellID, figure)
+        cellData = writePeaksToDf(peakIndices,cellData,cellID)
+        cellID += 1
+        return cellData
+
+
+    #print("test2")
+
+
+    def on_press(event):
+        global cellData
+        global cellID
+        print("cellID:", cellID)
+        print("cellData.columns:", len(cellData.columns))
+        if event.key == 'x':
+            if cellID < len(cellData.columns):
+                global fig
+                fig.clear()
+
+                event.canvas.figure.clear()
+                """
+                plt.close()
+                plt.cla()
+                plt.clf()
+                """
+                cellData = plot_cell(cellData, event.canvas.figure)
+                event.canvas.draw()
+
+    fig.canvas.mpl_connect('key_press_event', on_press)
+    cellData = plot_cell(cellData, fig)
+    plt.show()
+    """
     for cell in cellData.columns:
         #cellMean = "Mean" + str(cellID)
         videoFrames = len(cellData)
@@ -175,8 +260,11 @@ def main():
         plotPeaksOnOriginalData(peakIndices,originalIntensities,cellID)
         cellData = writePeaksToDf(peakIndices,cellData,cellID)
         cellID += 1
-
-    write_csv(cellData)
+    """
+    sys.stdout.close()
+    while 1:
+        if cellID > len(cellData.columns):
+            write_csv(cellData)
 
 
 if __name__ == "__main__":
