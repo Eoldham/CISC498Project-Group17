@@ -188,6 +188,12 @@ def main():
     def plot_cell(cellData, figure):
         #cellMean = "Mean" + str(cellID)
         global cellID
+
+        if cellID >= max:
+            write_csv(cellData)
+            cellID = 1
+
+        fig.canvas.set_window_title("Figure %d" %(cellID))
         cell = cellData.columns[cellID]
         videoFrames = len(cellData)
         average = cellData[cell].mean()
@@ -212,31 +218,22 @@ def main():
         return cellData
 
 
-    #print("test2")
-
-
     def on_press(event):
         global cellData
         global cellID
         print("cellID:", cellID)
         print("cellData.columns:", len(cellData.columns))
-        if event.key == 'x':
-            if cellID < len(cellData.columns):
-                global fig
-                fig.clear()
 
-                event.canvas.figure.clear()
-                """
-                plt.close()
-                plt.cla()
-                plt.clf()
-                """
-                cellData = plot_cell(cellData, event.canvas.figure)
-                event.canvas.draw()
+        if event.key == 'x':
+            global fig
+            fig.clear()
+
+            event.canvas.figure.clear()
+            cellData = plot_cell(cellData, event.canvas.figure)
+            event.canvas.draw()
 
     fig.canvas.mpl_connect('key_press_event', on_press)
-    cellData = plot_cell(cellData, fig)
-    plt.show()
+    # cellData = plot_cell(cellData, fig)
     """
     for cell in cellData.columns:
         #cellMean = "Mean" + str(cellID)
@@ -261,11 +258,12 @@ def main():
         cellData = writePeaksToDf(peakIndices,cellData,cellID)
         cellID += 1
     """
-    sys.stdout.close()
-    while 1:
-        if cellID > len(cellData.columns):
-            write_csv(cellData)
+    max = len(cellData.columns)
+    print("Max:", max)
 
+    cellData = plot_cell(cellData, fig)
+
+    sys.stdout.close()
 
 if __name__ == "__main__":
     main()
