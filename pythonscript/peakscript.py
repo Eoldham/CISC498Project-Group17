@@ -92,7 +92,9 @@ def smoothDataPoints(normalBase, df, cellMean):
     findNormalizedBase(filteredLowPass-newbase,df)
     return filteredLowPass, newbase
 
-
+"""
+For testing only
+"""
 def plotPeakCellData(x,y,df):
     plt.figure()
     plt.xlabel("Video Frame (#)")
@@ -101,7 +103,7 @@ def plotPeakCellData(x,y,df):
     plt.plot(y)
     plt.plot(x,y[x],"x")
     plt.plot(df["normalbaseline"],color='red',label="baseline")
-   # plt.show()
+
 
 def plotOriginalCellData(y, figure):
     # plt.figure()
@@ -109,7 +111,6 @@ def plotOriginalCellData(y, figure):
     plt.xlabel("Video Frame (#)")
     plt.ylabel("Calcium Intensity")
     figure.gca().plot(y)
-    # plt.show()
 
 
 def matchRefinedPeakToActualPeak(peaks, originalData):
@@ -125,63 +126,23 @@ def matchRefinedPeakToActualPeak(peaks, originalData):
     return peakIndices
 
 
-"""
-def plotPeaksOnOriginalData(peaks,data,cellnum,fig):
-    # matplotlib.use("Agg")
-    # fig = plt.figure()
-    plt.title("Original Calcium Intensity Over Time with Peaks")
-    plt.xlabel("Video Frame (#)")
-    plt.ylabel("Calcium Intensity")
-    #plt.plot(data)
-    fig.gca().plot(idx, data[idx],"x")
-    for idx in peaks:
-        fig.gca().plot(idx, data[idx],"x")
-        #plt.plot(idx, data[idx],"x")
-
-    """"""
-    plotName = "cell" + str(cellnum) + "_peak_plot.png"
-    path = "plugins/CalciumSignal/pythonscript/cell_data/" + plotName
-    plt.savefig(path, format="png")
-    """"""
-
-    plt.show()
-    return fig
-"""
-
-# fig = None
 cellData = read_csvs()
 cellID = 1
 fig = plt.figure()
 
 def main():
-    sys.stdout = open('output.txt', 'w')
-    #read in files
-    #cellData = read_csvs()
-    #cellDataList = cellDataList.columns
-    #print(cellData)
-    #cellID = 1
-    # global fig
+    # debugging only
+    # sys.stdout = open('output.txt', 'w')
     global cellData
     global cellID
-    # fig, ax = plt.subplots()
 
     def plotPeaksOnOriginalData(peaks,data,cellnum,figure):
-        # matplotlib.use("Agg")
-        # fig = plt.figure()
         plt.title("Original Calcium Intensity Over Time with Peaks")
         plt.xlabel("Video Frame (#)")
         plt.ylabel("Calcium Intensity")
-        #plt.plot(data)
+
         for idx in peaks:
             figure.gca().plot(idx, data[idx],"x")
-            # plt.show()
-            #plt.plot(idx, data[idx],"x")
-
-        """
-        plotName = "cell" + str(cellnum) + "_peak_plot.png"
-        path = "plugins/CalciumSignal/pythonscript/cell_data/" + plotName
-        plt.savefig(path, format="png")
-        """
 
         plt.show()
 
@@ -207,10 +168,8 @@ def main():
         refinedData = smoothedData - smoothedBase
 
         peaks, properties = find_peaks(refinedData, prominence=(5))
-        #print(peaks)
         plotOriginalCellData(originalIntensities, figure)
         #plotPeakCellData(peaks,refinedData,cell)
-        #print(originalIntensities)
         peakIndices = matchRefinedPeakToActualPeak(peaks,originalIntensities)
         plotPeaksOnOriginalData(peakIndices,originalIntensities,cellID, figure)
         cellData = writePeaksToDf(peakIndices,cellData,cellID)
@@ -221,8 +180,6 @@ def main():
     def on_press(event):
         global cellData
         global cellID
-        print("cellID:", cellID)
-        print("cellData.columns:", len(cellData.columns))
 
         if event.key == 'x':
             global fig
@@ -233,37 +190,11 @@ def main():
             event.canvas.draw()
 
     fig.canvas.mpl_connect('key_press_event', on_press)
-    # cellData = plot_cell(cellData, fig)
-    """
-    for cell in cellData.columns:
-        #cellMean = "Mean" + str(cellID)
-        videoFrames = len(cellData)
-        average = cellData[cell].mean()
-        originalIntensities = cellData[cell].values.tolist()
-        # find baseline
-        firstBaseline = findBaseline(average, list(originalIntensities), cellData)
-        #normalize Data - don't need to use for now
-        #normalBase = normalizeData(firstBaseline, cell, cellMean)
-        smoothedData, smoothedBase = smoothDataPoints(firstBaseline,cellData,cell)
-        #plot graph
-        refinedData = smoothedData - smoothedBase
-
-        peaks, properties = find_peaks(refinedData, prominence=(5))
-        print(peaks)
-        plotOriginalCellData(originalIntensities)
-        #plotPeakCellData(peaks,refinedData,cell)
-        #print(originalIntensities)
-        peakIndices = matchRefinedPeakToActualPeak(peaks,originalIntensities)
-        plotPeaksOnOriginalData(peakIndices,originalIntensities,cellID)
-        cellData = writePeaksToDf(peakIndices,cellData,cellID)
-        cellID += 1
-    """
-    max = len(cellData.columns)
-    print("Max:", max)
 
     cellData = plot_cell(cellData, fig)
 
-    sys.stdout.close()
+    # debugging only (see output.txt above)
+    # sys.stdout.close()
 
 if __name__ == "__main__":
     main()
