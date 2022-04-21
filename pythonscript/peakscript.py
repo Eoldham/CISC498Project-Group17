@@ -154,7 +154,7 @@ def main():
             write_csv(cellData)
             cellID = 1
 
-        fig.canvas.set_window_title("Figure %d" %(cellID))
+        fig.canvas.manager.set_window_title("Cell %d" %(cellID))
         cell = cellData.columns[cellID]
         videoFrames = len(cellData)
         average = cellData[cell].mean()
@@ -189,6 +189,7 @@ def main():
             cellData = plot_cell(cellData, event.canvas.figure)
             event.canvas.draw()
 
+    max = len(cellData.columns)
     fig.canvas.mpl_connect('key_press_event', on_press)
 
     cellData = plot_cell(cellData, fig)
