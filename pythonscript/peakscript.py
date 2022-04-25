@@ -124,7 +124,7 @@ def matchRefinedPeakToActualPeak(peaks, originalData):
 
 
 cellData = read_csvs()
-cellID = 1
+cellID = 0
 fig = plt.figure()
 
 def main():
@@ -149,7 +149,8 @@ def main():
     def plot_cell(cellData, figure):
         global cellID
 
-        fig.canvas.manager.set_window_title("Cell %d" %(cellID))
+        # we're really starting from Cell 0 because of indices. but it's easier for the client to start from 1
+        fig.canvas.manager.set_window_title("Cell %d" %(cellID + 1))
         cell = cellData.columns[cellID]
         videoFrames = len(cellData)
         average = cellData[cell].mean()
@@ -166,7 +167,7 @@ def main():
         plotOriginalCellData(originalIntensities, figure)
         #plotPeakCellData(peaks,refinedData,cell)
         peakIndices = matchRefinedPeakToActualPeak(peaks,originalIntensities)
-        plotPeaksOnOriginalData(peakIndices,originalIntensities,cellID, figure)
+        plotPeaksOnOriginalData(peakIndices,originalIntensities,cellID,figure)
         cellData = writePeaksToDf(peakIndices,cellData,cellID)
         return cellData
 
@@ -182,12 +183,12 @@ def main():
             if event.key == 'right' or event.key == 'd':
                 cellID += 1
                 if cellID >= max:
-                    cellID = 1
+                    cellID = 0
             if event.key == 'left' or event.key == 'a':
-                if cellID > 1:
+                if cellID > 0:
                     cellID -= 1
-                elif cellID <= 1:
-                    cellID = max
+                elif cellID <= 0:
+                    cellID = max - 1
 
             fig.clear()
             event.canvas.figure.clear()
