@@ -25,7 +25,7 @@ def read_csvs():
 
 """Stores all relevant graph data to a csv for the ImageJ plugin to use"""
 def write_csv(df):
-    #when we have a folder of, files, read in from directory path
+    # when we have a folder of, files, read in from directory path
     path = "plugins/CalciumSignal/pythonscript/cell_data/"
     df.to_csv(os.path.join(path, "graph_data.csv"))
     return
@@ -53,7 +53,6 @@ def findBaseline(avg, intensities, cellDf):
     return (base)
 
 
-
 """Creates a new df column with normalized data"""
 """TODO: maybe later changed so can use findBaseline function instead"""
 """For now, only use when passing in normalized data"""
@@ -76,7 +75,6 @@ def normalizeData(base1, df, cellMean):
     y = df[cellMean] #list of intensities
     base2 = peakutils.baseline(y, math.floor(base1))
     normalizedData = y - base2
-    #print(normalizedData)
     findNormalizedBase(normalizedData, df) #new normbaseline column created
     return base2
 
@@ -93,7 +91,7 @@ def smoothDataPoints(normalBase, df, cellMean):
     return filteredLowPass, newbase
 
 """
-For testing only
+This function is for testing only
 """
 def plotPeakCellData(x,y,df):
     plt.figure()
@@ -106,7 +104,6 @@ def plotPeakCellData(x,y,df):
 
 
 def plotOriginalCellData(y, figure):
-    # plt.figure()
     plt.title("Original Calcium Intensity Over Time")
     plt.xlabel("Video Frame (#)")
     plt.ylabel("Calcium Intensity")
@@ -131,8 +128,11 @@ cellID = 1
 fig = plt.figure()
 
 def main():
-    # debugging only
+    # uncomment below line for debugging only (and be sure to close stdout at the end)
+    # this redirects print() output to output.txt, which you will find in the Fiji.app directory after program finishes
     # sys.stdout = open('output.txt', 'w')
+
+    # sorry about the globals. it's for a good cause, I promise.
     global cellData
     global cellID
 
@@ -147,12 +147,7 @@ def main():
         plt.show()
 
     def plot_cell(cellData, figure):
-        #cellMean = "Mean" + str(cellID)
         global cellID
-
-        if cellID >= max:
-            write_csv(cellData)
-            cellID = 1
 
         fig.canvas.manager.set_window_title("Cell %d" %(cellID))
         cell = cellData.columns[cellID]
@@ -161,10 +156,10 @@ def main():
         originalIntensities = cellData[cell].values.tolist()
         # find baseline
         firstBaseline = findBaseline(average, list(originalIntensities), cellData)
-        #normalize Data - don't need to use for now
-        #normalBase = normalizeData(firstBaseline, cell, cellMean)
+        # normalize Data - don't need to use for now
+        # normalBase = normalizeData(firstBaseline, cell, cellMean)
         smoothedData, smoothedBase = smoothDataPoints(firstBaseline,cellData,cell)
-        #plot graph
+        # plot graph
         refinedData = smoothedData - smoothedBase
 
         peaks, properties = find_peaks(refinedData, prominence=(5))
@@ -173,18 +168,28 @@ def main():
         peakIndices = matchRefinedPeakToActualPeak(peaks,originalIntensities)
         plotPeaksOnOriginalData(peakIndices,originalIntensities,cellID, figure)
         cellData = writePeaksToDf(peakIndices,cellData,cellID)
-        cellID += 1
         return cellData
 
 
+    # key event listener for switching between cell graphs
     def on_press(event):
         global cellData
         global cellID
+        global fig
 
-        if event.key == 'x':
-            global fig
+        # right arrow key to advance, left to go back (WASD scheme used as a backup)
+        if event.key in ['right', 'left', 'd', 'a']:
+            if event.key == 'right' or event.key == 'd':
+                cellID += 1
+                if cellID >= max:
+                    cellID = 1
+            if event.key == 'left' or event.key == 'a':
+                if cellID > 1:
+                    cellID -= 1
+                elif cellID <= 1:
+                    cellID = max
+
             fig.clear()
-
             event.canvas.figure.clear()
             cellData = plot_cell(cellData, event.canvas.figure)
             event.canvas.draw()
@@ -194,7 +199,10 @@ def main():
 
     cellData = plot_cell(cellData, fig)
 
-    # debugging only (see output.txt above)
+    # write to csv at the end (after window is closed)!
+    write_csv(cellData)
+
+    # uncomment below for debugging only (also see output.txt at the start of main)
     # sys.stdout.close()
 
 if __name__ == "__main__":
