@@ -150,7 +150,8 @@ def main():
         global cellID
 
         # we're really starting from Cell 0 because of indices. but it's easier for the client to start from 1
-        fig.canvas.manager.set_window_title("Cell %d" %(cellID + 1))
+        figure.canvas.manager.set_window_title("Cell %d" %(cellID + 1))
+        # figure.canvas.toolbar.pack_forget()
         cell = cellData.columns[cellID]
         videoFrames = len(cellData)
         average = cellData[cell].mean()
@@ -179,6 +180,7 @@ def main():
         global fig
 
         # right arrow key to advance, left to go back (WASD scheme used as a backup)
+        # graphs should wrap if you go past the last cell or before the first one -- hence, "carousel view"
         if event.key in ['right', 'left', 'd', 'a']:
             if event.key == 'right' or event.key == 'd':
                 cellID += 1
