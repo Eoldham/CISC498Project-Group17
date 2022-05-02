@@ -1,9 +1,7 @@
 import celldetection._3D_objects_counter;
-import ij.IJ;
-import ij.ImageJ;
-import ij.ImagePlus;
-import ij.WindowManager;
+import ij.*;
 import ij.gui.NonBlockingGenericDialog;
+import ij.gui.Overlay;
 import ij.gui.Roi;
 import ij.measure.ResultsTable;
 import ij.plugin.PlugIn;
@@ -135,7 +133,7 @@ public class CalciumSignal_ implements PlugIn {
     void runRoiManager(){
 
         //Creates RoiManager
-        RoiManager rm = new RoiManager();
+        custom_roiManager crm = new custom_roiManager(PYTHONSCRIPT_PATH);
 
         //Creates New scanner of edgeDetection CSV
         try {
@@ -159,56 +157,62 @@ public class CalciumSignal_ implements PlugIn {
                 splitLine = line.split("[,]");
 
                 //int fixer = 0;
-                int fixer = 10;
+                //int fixer = 10;
 
                 //Set all necessary vars
 //                x = Double.parseDouble(splitLine[4])  - fixer;
 //                y = Double.parseDouble(splitLine[5]) - fixer;
 //                width = Double.parseDouble(splitLine[7]);
 //                height = Double.parseDouble(splitLine[8]);
-
-                    x = Double.parseDouble(splitLine[12])  - fixer;
-                    y = Double.parseDouble(splitLine[13]) - fixer;
                     width = Double.parseDouble(splitLine[24]);
                     height = Double.parseDouble(splitLine[25]);
+                    x = Double.parseDouble(splitLine[12]) - width/2 ;
+                    y = Double.parseDouble(splitLine[13]) - height/2;
+//                    width = Double.parseDouble(splitLine[24]);
+//                    height = Double.parseDouble(splitLine[25]);
 
                 //Create ROI with Input: int x, int y, int width, int height, int cornerDiameter
                 Roi roi = new Roi((int)x, (int)y, (int)width, (int)height, cornerDiameter);
 
 
                 //Add Roi to RoiManager
-                rm.addRoi(roi);
-
+                crm.addRoi(roi);
 
             }
         }catch(IOException e) {
             e.printStackTrace();
         }
 
+//        crm.rm.runCommand("show all");
+//        crm.rm.runCommand("Delete");
+
+
+
+
         //Makes Roi's visible in roi Manager
         //rm.runCommand("show all with labels");
-        rm.runCommand("show all");
+        //rm.mm.runCommand("show all");
 
 
-        NonBlockingGenericDialog message =  new NonBlockingGenericDialog("Done editing cells");
-        message.addMessage("When you are done adding and deleting cells press OK to measure");
-        message.showDialog();
-
-        if (message.wasOKed()) {
-
-            rm.runCommand("multi-measure");
-
-            //Gets active table and saves
-            String path = PYTHONSCRIPT_PATH + "/cell_data/realResults.csv";
-            ResultsTable results = ij.measure.ResultsTable.getResultsTable();
-            try {
-                results.saveAs(path);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            rm.close();
-        }
+//        NonBlockingGenericDialog message =  new NonBlockingGenericDialog("Done editing cells");
+//        message.addMessage("When you are done adding and deleting cells press OK to measure");
+//        message.showDialog();
+//
+//        if (message.wasOKed()) {
+//
+//            rm.runCommand("multi-measure");
+//
+//            //Gets active table and saves
+//            String path = PYTHONSCRIPT_PATH + "/cell_data/realResults.csv";
+//            ResultsTable results = ij.measure.ResultsTable.getResultsTable();
+//            try {
+//                results.saveAs(path);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//            rm.close();
+//        }
 
     }
 
