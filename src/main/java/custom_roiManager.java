@@ -48,8 +48,8 @@ public class custom_roiManager extends PlugInFrame implements ActionListener, Ke
         setLayout(new BorderLayout());
 
         panel = new Panel();
-        addButton("Add [t]");
-        addButton("Delete");
+//        addButton("Add [t]");
+//        addButton("Delete");
         addButton("Measure");
         addTextFields();
 
