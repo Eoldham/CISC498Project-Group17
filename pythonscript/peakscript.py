@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import sys
 from scipy.signal import find_peaks, peak_prominences, filtfilt, butter
+from matplotlib.backend_bases import MouseButton
 
 
 
@@ -122,10 +123,97 @@ def matchRefinedPeakToActualPeak(peaks, originalData):
         peakIndices.append(highPointIndex)
     return peakIndices
 
-
+##GLOBAL VARIABLES###
 cellData = read_csvs()
 cellID = 0
 fig = plt.figure()
+##GLOBAL VARIABLES###
+
+def on_click(event):
+    print("on_click")
+    if event.button is MouseButton.LEFT:
+        print("LEFT")  # normal click
+        # call add peak function
+        user_addPeak(event)
+    elif event.button is MouseButton.RIGHT:
+        print("Right")  # right click - remove
+        # call remove peak function
+        user_removePeak(event)
+
+
+def user_removePeak(event):
+    print("remove peak from graph function")
+    ##register x,y coordinate of mouse click
+    #determine closest peak in df (based on frame range) to mouse click
+    #remove this point from df (make it -1)
+    #replot any peaks
+    peakCol = "Cell" + str(cellID) + "_Peaks"
+    dataCol = "Mean" + str(cellID)
+    if event.inaxes:  # checks to see if user clicked on the plotted graph
+        ax = event.inaxes  # the axes instance
+        x = int(event.xdata)
+        y = int(event.ydata)
+        print('data coords %f %f' % (x, y))
+
+        removeIdx = x
+        diff = x
+        for data in range(x - 10, x + 10):  # original was 30
+            try:
+                if cellData[peakCol][data] == 1:
+                    if abs(cellData[dataCol][data] - cellData[dataCol][removeIdx]) < diff:
+                        removeIdx = data
+                        diff = abs(cellData[dataCol][data] - cellData[dataCol][removeIdx])
+            except:
+                continue  # ignore indexes that are out of range
+
+        cellData[peakCol][removeIdx] = -1
+        #plt.cla()
+        #plt.plot(cellData[dataCol], color="midnightblue")
+
+        plot_cell(cellData,figure)
+        """
+        for i in range(0, len(cellData[peakCol])):
+            if cellData[peakCol][i] == 1:
+                plt.plot(i, cellData[dataCol][i], marker="x", color="red")
+        plt.connect('button_press_event', on_click)
+        plt.draw()
+        plt.show()
+        """
+
+
+def user_addPeak(event):
+    print("add peak to graph function")
+    #following two lines should be in another function before carosel view
+    peakCol = "Cell" + str(cellID) + "_Peaks"
+    dataCol = "Mean" + str(cellID)
+    if event.inaxes: # checks to see if user clicked on the plotted graph
+        ax = event.inaxes  # the axes instance
+        x = int(event.xdata)
+        y = int(event.ydata)
+        print('data coords %f %f' % (x, y))
+
+        maxValIdx = x
+        for data in range(x - 10, x + 10):  # original was 30
+            try:
+                if cellData[dataCol][data] > cellData[dataCol][maxValIdx]:
+                    maxValIdx = data
+            except:
+                continue  # ignore indexes that are out of range
+        #print(cellData[peakCol][maxValIdx])
+        cellData.loc[maxValIdx,peakCol] = 1
+        print("x: " + str(maxValIdx))
+        print("y: " + str(df[dataCol][maxValIdx]))
+
+        plot_cell(cellData,figure)
+        #plt.plot(maxValIdx, cellData[dataCol][maxValIdx], marker="x", color="red")
+
+        #plt.connect('button_press_event', on_click)
+        #print(maxValIdx)
+        #print(cellData[peakCol][maxValIdx])
+        #print("DONE")
+        #plt.draw()
+        #plt.show()
+
 
 def main():
     # uncomment below line for debugging only (and be sure to close stdout at the end)
@@ -199,6 +287,7 @@ def main():
 
     max = len(cellData.columns)
     fig.canvas.mpl_connect('key_press_event', on_press)
+    plt.connect('button_press_event', on_click)
 
     cellData = plot_cell(cellData, fig)
 
