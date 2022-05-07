@@ -11,7 +11,6 @@ from scipy.signal import find_peaks, peak_prominences, filtfilt, butter
 from matplotlib.backend_bases import MouseButton
 
 
-
 """Reads in all csv files in folder and creates an array of pandas dataframes
    returns array of dfs"""
 def read_csvs():
@@ -127,7 +126,79 @@ def matchRefinedPeakToActualPeak(peaks, originalData):
 cellData = read_csvs()
 cellID = 0
 fig = plt.figure()
+max = len(cellData.columns)
 ##GLOBAL VARIABLES###
+
+def plotPeaksOnOriginalData(peaks,data,cellnum,figure):
+    plt.title("Original Calcium Intensity Over Time with Peaks")
+    plt.xlabel("Video Frame (#)")
+    plt.ylabel("Calcium Intensity")
+
+    for idx in peaks:
+        figure.gca().plot(idx, data[idx],"x")
+
+
+def plot_cell(cellData, figure):
+    global cellID
+
+    # we're really starting from Cell 0 because of indices. but it's easier for the client to start from 1
+    figure.canvas.manager.set_window_title("Cell %d" %(cellID + 1))
+    # figure.canvas.toolbar.pack_forget()
+    cell = cellData.columns[cellID]
+    videoFrames = len(cellData)
+    average = cellData[cell].mean()
+    originalIntensities = cellData[cell].values.tolist()
+    # find baseline
+    firstBaseline = findBaseline(average, list(originalIntensities), cellData)
+    # normalize Data - don't need to use for now
+    # normalBase = normalizeData(firstBaseline, cell, cellMean)
+    smoothedData, smoothedBase = smoothDataPoints(firstBaseline,cellData,cell)
+    # plot graph
+    refinedData = smoothedData - smoothedBase
+
+    peaks, properties = find_peaks(refinedData, prominence=(5))
+    plotOriginalCellData(originalIntensities, figure)
+    #plotPeakCellData(peaks,refinedData,cell)
+    peakIndices = matchRefinedPeakToActualPeak(peaks,originalIntensities)
+    plotPeaksOnOriginalData(peakIndices,originalIntensities,cellID,figure)
+
+    peakCol = "Cell" + str(cellID + 1) + "_Peaks"
+    dataCol = "Mean" + str(cellID + 1)
+
+    if peakCol in cellData.columns:
+        for i in range(0,len(cellData[peakCol])):
+            if cellData[peakCol][i] == 1:
+                plt.plot(i,cellData[dataCol][i],marker="x",color="red")
+
+    cellData = writePeaksToDf(peakIndices,cellData,cellID)
+    return cellData
+
+
+# key event listener for switching between cell graphs
+def on_press(event):
+    global cellData
+    global cellID
+    global fig
+    global max
+
+    # right arrow key to advance, left to go back (WASD scheme used as a backup)
+    # graphs should wrap if you go past the last cell or before the first one -- hence, "carousel view"
+    if event.key in ['right', 'left', 'd', 'a']:
+        if event.key == 'right' or event.key == 'd':
+            cellID += 1
+            if cellID >= max:
+                cellID = 0
+        if event.key == 'left' or event.key == 'a':
+            if cellID > 0:
+                cellID -= 1
+            elif cellID <= 0:
+                cellID = max - 1
+
+        fig.clear()
+        event.canvas.figure.clear()
+        cellData = plot_cell(cellData, event.canvas.figure)
+        event.canvas.draw()
+
 
 def on_click(event):
     print("on_click")
@@ -142,13 +213,16 @@ def on_click(event):
 
 
 def user_removePeak(event):
+    global cellData
+    global fig
+
     print("remove peak from graph function")
     ##register x,y coordinate of mouse click
     #determine closest peak in df (based on frame range) to mouse click
     #remove this point from df (make it -1)
     #replot any peaks
-    peakCol = "Cell" + str(cellID) + "_Peaks"
-    dataCol = "Mean" + str(cellID)
+    peakCol = "Cell" + str(cellID + 1) + "_Peaks"
+    dataCol = "Mean" + str(cellID + 1)
     if event.inaxes:  # checks to see if user clicked on the plotted graph
         ax = event.inaxes  # the axes instance
         x = int(event.xdata)
@@ -167,25 +241,25 @@ def user_removePeak(event):
                 continue  # ignore indexes that are out of range
 
         cellData[peakCol][removeIdx] = -1
-        #plt.cla()
-        #plt.plot(cellData[dataCol], color="midnightblue")
 
-        plot_cell(cellData,figure)
-        """
-        for i in range(0, len(cellData[peakCol])):
-            if cellData[peakCol][i] == 1:
-                plt.plot(i, cellData[dataCol][i], marker="x", color="red")
-        plt.connect('button_press_event', on_click)
-        plt.draw()
+        fig.clear()
+        event.canvas.figure.clear()
+        cellData = plot_cell(cellData, event.canvas.figure)
+
+        event.canvas.draw()
+
+        # print("DONE")
         plt.show()
-        """
 
 
 def user_addPeak(event):
+    global cellData
+    global fig
+
     print("add peak to graph function")
     #following two lines should be in another function before carosel view
-    peakCol = "Cell" + str(cellID) + "_Peaks"
-    dataCol = "Mean" + str(cellID)
+    peakCol = "Cell" + str(cellID + 1) + "_Peaks"
+    dataCol = "Mean" + str(cellID + 1)
     if event.inaxes: # checks to see if user clicked on the plotted graph
         ax = event.inaxes  # the axes instance
         x = int(event.xdata)
@@ -201,101 +275,40 @@ def user_addPeak(event):
                 continue  # ignore indexes that are out of range
         #print(cellData[peakCol][maxValIdx])
         cellData.loc[maxValIdx,peakCol] = 1
+        print(cellData.loc[maxValIdx, peakCol])
         print("x: " + str(maxValIdx))
-        print("y: " + str(df[dataCol][maxValIdx]))
+        print("y: " + str(cellData[dataCol][maxValIdx]))
 
-        plot_cell(cellData,figure)
-        #plt.plot(maxValIdx, cellData[dataCol][maxValIdx], marker="x", color="red")
+        fig.clear()
+        event.canvas.figure.clear()
+        cellData = plot_cell(cellData, event.canvas.figure)
+        event.canvas.draw()
 
-        #plt.connect('button_press_event', on_click)
-        #print(maxValIdx)
-        #print(cellData[peakCol][maxValIdx])
-        #print("DONE")
-        #plt.draw()
-        #plt.show()
+        # print("DONE")
+        plt.show()
 
 
 def main():
     # uncomment below line for debugging only (and be sure to close stdout at the end)
     # this redirects print() output to output.txt, which you will find in the Fiji.app directory after program finishes
-    # sys.stdout = open('output.txt', 'w')
+    sys.stdout = open('output.txt', 'w')
 
     # sorry about the globals. it's for a good cause, I promise.
     global cellData
     global cellID
+    global fig
 
-    def plotPeaksOnOriginalData(peaks,data,cellnum,figure):
-        plt.title("Original Calcium Intensity Over Time with Peaks")
-        plt.xlabel("Video Frame (#)")
-        plt.ylabel("Calcium Intensity")
-
-        for idx in peaks:
-            figure.gca().plot(idx, data[idx],"x")
-
-        plt.show()
-
-    def plot_cell(cellData, figure):
-        global cellID
-
-        # we're really starting from Cell 0 because of indices. but it's easier for the client to start from 1
-        figure.canvas.manager.set_window_title("Cell %d" %(cellID + 1))
-        # figure.canvas.toolbar.pack_forget()
-        cell = cellData.columns[cellID]
-        videoFrames = len(cellData)
-        average = cellData[cell].mean()
-        originalIntensities = cellData[cell].values.tolist()
-        # find baseline
-        firstBaseline = findBaseline(average, list(originalIntensities), cellData)
-        # normalize Data - don't need to use for now
-        # normalBase = normalizeData(firstBaseline, cell, cellMean)
-        smoothedData, smoothedBase = smoothDataPoints(firstBaseline,cellData,cell)
-        # plot graph
-        refinedData = smoothedData - smoothedBase
-
-        peaks, properties = find_peaks(refinedData, prominence=(5))
-        plotOriginalCellData(originalIntensities, figure)
-        #plotPeakCellData(peaks,refinedData,cell)
-        peakIndices = matchRefinedPeakToActualPeak(peaks,originalIntensities)
-        plotPeaksOnOriginalData(peakIndices,originalIntensities,cellID,figure)
-        cellData = writePeaksToDf(peakIndices,cellData,cellID)
-        return cellData
-
-
-    # key event listener for switching between cell graphs
-    def on_press(event):
-        global cellData
-        global cellID
-        global fig
-
-        # right arrow key to advance, left to go back (WASD scheme used as a backup)
-        # graphs should wrap if you go past the last cell or before the first one -- hence, "carousel view"
-        if event.key in ['right', 'left', 'd', 'a']:
-            if event.key == 'right' or event.key == 'd':
-                cellID += 1
-                if cellID >= max:
-                    cellID = 0
-            if event.key == 'left' or event.key == 'a':
-                if cellID > 0:
-                    cellID -= 1
-                elif cellID <= 0:
-                    cellID = max - 1
-
-            fig.clear()
-            event.canvas.figure.clear()
-            cellData = plot_cell(cellData, event.canvas.figure)
-            event.canvas.draw()
-
-    max = len(cellData.columns)
     fig.canvas.mpl_connect('key_press_event', on_press)
-    plt.connect('button_press_event', on_click)
+    fig.canvas.mpl_connect('button_press_event', on_click)
 
     cellData = plot_cell(cellData, fig)
+    plt.show()
 
     # write to csv at the end (after window is closed)!
     write_csv(cellData)
 
     # uncomment below for debugging only (also see output.txt at the start of main)
-    # sys.stdout.close()
+    sys.stdout.close()
 
 if __name__ == "__main__":
     main()
