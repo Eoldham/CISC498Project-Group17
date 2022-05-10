@@ -137,9 +137,26 @@ def plotPeaksOnOriginalData(peaks,data,cellnum,figure):
     for idx in peaks:
         figure.gca().plot(idx, data[idx],"x")
 
+def replot_cell(figure):
+    print("HERE")
+    figure.canvas.manager.set_window_title("Cell %d" %(cellID + 1))
+    peakCol = "Cell" + str(cellID + 1) + "_Peaks"
+    dataCol = "Mean" + str(cellID + 1)
 
-def plot_cell(cellData, figure):
+    plotOriginalCellData(cellData[dataCol].values.tolist(), figure)
+    if peakCol in cellData.columns:
+            for i in range(0,len(cellData[peakCol])):
+                if cellData[peakCol][i] == 1:
+                    print("peak")
+                    figure.gca().plot(i,cellData[dataCol][i],marker="x",color="red")
+
+    #cellData = writePeaksToDf(peakIndices,cellData,cellID)
+
+    #return cellData
+
+def plot_cell(figure):
     global cellID
+    global cellData
 
     # we're really starting from Cell 0 because of indices. but it's easier for the client to start from 1
     figure.canvas.manager.set_window_title("Cell %d" %(cellID + 1))
@@ -157,11 +174,13 @@ def plot_cell(cellData, figure):
     refinedData = smoothedData - smoothedBase
 
     peaks, properties = find_peaks(refinedData, prominence=(5))
-    plotOriginalCellData(originalIntensities, figure)
+    #plotOriginalCellData(originalIntensities, figure)
     #plotPeakCellData(peaks,refinedData,cell)
     peakIndices = matchRefinedPeakToActualPeak(peaks,originalIntensities)
-    plotPeaksOnOriginalData(peakIndices,originalIntensities,cellID,figure)
-
+    #plotPeaksOnOriginalData(peakIndices,originalIntensities,cellID,figure)
+    cellData = writePeaksToDf(peakIndices,cellData,cellID)
+    #return cellData
+"""
     peakCol = "Cell" + str(cellID + 1) + "_Peaks"
     dataCol = "Mean" + str(cellID + 1)
 
@@ -169,9 +188,8 @@ def plot_cell(cellData, figure):
         for i in range(0,len(cellData[peakCol])):
             if cellData[peakCol][i] == 1:
                 plt.plot(i,cellData[dataCol][i],marker="x",color="red")
+"""
 
-    cellData = writePeaksToDf(peakIndices,cellData,cellID)
-    return cellData
 
 
 # key event listener for switching between cell graphs
@@ -196,7 +214,7 @@ def on_press(event):
 
         fig.clear()
         event.canvas.figure.clear()
-        cellData = plot_cell(cellData, event.canvas.figure)
+        replot_cell(event.canvas.figure)
         event.canvas.draw()
 
 
@@ -240,11 +258,12 @@ def user_removePeak(event):
             except:
                 continue  # ignore indexes that are out of range
 
-        cellData[peakCol][removeIdx] = -1
+        #cellData[peakCol][removeIdx] = -1
+        cellData.loc[removeIdx,peakCol] = -1
 
         fig.clear()
         event.canvas.figure.clear()
-        cellData = plot_cell(cellData, event.canvas.figure)
+        replot_cell(event.canvas.figure)
 
         event.canvas.draw()
 
@@ -281,7 +300,7 @@ def user_addPeak(event):
 
         fig.clear()
         event.canvas.figure.clear()
-        cellData = plot_cell(cellData, event.canvas.figure)
+        replot_cell(event.canvas.figure)
         event.canvas.draw()
 
         # print("DONE")
@@ -301,11 +320,18 @@ def main():
     fig.canvas.mpl_connect('key_press_event', on_press)
     fig.canvas.mpl_connect('button_press_event', on_click)
 
-    cellData = plot_cell(cellData, fig)
-    plt.show()
-
+    numColumns = len(cellData.columns)
+    for col in range(0,numColumns):
+        cellID = col
+        plot_cell(fig)
+    #plt.show()
+    cellID = 0
     # write to csv at the end (after window is closed)!
     write_csv(cellData)
+    path = "plugins/CalciumSignal/pythonscript/cell_data/"
+    cellData = pd.read_csv((path + "graph_data.csv"))
+    replot_cell(fig)
+    plt.show()
 
     # uncomment below for debugging only (also see output.txt at the start of main)
     sys.stdout.close()
