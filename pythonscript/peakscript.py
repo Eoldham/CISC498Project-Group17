@@ -326,12 +326,14 @@ def main():
         plot_cell(fig)
     #plt.show()
     cellID = 0
-    # write to csv at the end (after window is closed)!
-    write_csv(cellData)
+
     path = "plugins/CalciumSignal/pythonscript/cell_data/"
     cellData = pd.read_csv((path + "graph_data.csv"))
     replot_cell(fig)
     plt.show()
+
+    # write to csv at the end (after window is closed)!
+    write_csv(cellData)
 
     # uncomment below for debugging only (also see output.txt at the start of main)
     sys.stdout.close()
