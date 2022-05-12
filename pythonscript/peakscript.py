@@ -310,7 +310,7 @@ def user_addPeak(event):
 def main():
     # uncomment below line for debugging only (and be sure to close stdout at the end)
     # this redirects print() output to output.txt, which you will find in the Fiji.app directory after program finishes
-    sys.stdout = open('output.txt', 'w')
+    # sys.stdout = open('output.txt', 'w')
 
     # sorry about the globals. it's for a good cause, I promise.
     global cellData
@@ -336,7 +336,7 @@ def main():
     write_csv(cellData)
 
     # uncomment below for debugging only (also see output.txt at the start of main)
-    sys.stdout.close()
+    # sys.stdout.close()
 
 if __name__ == "__main__":
     main()
