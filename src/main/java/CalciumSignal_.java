@@ -156,20 +156,11 @@ public class CalciumSignal_ implements PlugIn {
                 line = scan.nextLine();
                 splitLine = line.split("[,]");
 
-                //int fixer = 0;
-                //int fixer = 10;
-
-                //Set all necessary vars
-//                x = Double.parseDouble(splitLine[4])  - fixer;
-//                y = Double.parseDouble(splitLine[5]) - fixer;
-//                width = Double.parseDouble(splitLine[7]);
-//                height = Double.parseDouble(splitLine[8]);
-                    width = Double.parseDouble(splitLine[24]);
-                    height = Double.parseDouble(splitLine[25]);
-                    x = Double.parseDouble(splitLine[12]) - width/2 ;
-                    y = Double.parseDouble(splitLine[13]) - height/2;
-//                    width = Double.parseDouble(splitLine[24]);
-//                    height = Double.parseDouble(splitLine[25]);
+                // This is used to make sure we have x and y at the center of the detected region
+                width = Double.parseDouble(splitLine[24]);
+                height = Double.parseDouble(splitLine[25]);
+                x = Double.parseDouble(splitLine[12]) - width/2 ;
+                y = Double.parseDouble(splitLine[13]) - height/2;
 
                 //Create ROI with Input: int x, int y, int width, int height, int cornerDiameter
                 Roi roi = new Roi((int)x, (int)y, (int)width, (int)height, cornerDiameter);
@@ -182,37 +173,6 @@ public class CalciumSignal_ implements PlugIn {
         }catch(IOException e) {
             e.printStackTrace();
         }
-
-//        crm.rm.runCommand("show all");
-//        crm.rm.runCommand("Delete");
-
-
-
-
-        //Makes Roi's visible in roi Manager
-        //rm.runCommand("show all with labels");
-        //rm.mm.runCommand("show all");
-
-
-//        NonBlockingGenericDialog message =  new NonBlockingGenericDialog("Done editing cells");
-//        message.addMessage("When you are done adding and deleting cells press OK to measure");
-//        message.showDialog();
-//
-//        if (message.wasOKed()) {
-//
-//            rm.runCommand("multi-measure");
-//
-//            //Gets active table and saves
-//            String path = PYTHONSCRIPT_PATH + "/cell_data/realResults.csv";
-//            ResultsTable results = ij.measure.ResultsTable.getResultsTable();
-//            try {
-//                results.saveAs(path);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//            rm.close();
-//        }
 
     }
 

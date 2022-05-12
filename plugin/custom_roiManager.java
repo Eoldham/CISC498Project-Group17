@@ -12,8 +12,6 @@ import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Arrays;
@@ -22,7 +20,7 @@ import java.util.Set;
 
 import static com.sun.java.accessibility.util.AWTEventMonitor.addKeyListener;
 
-public class custom_roiManager extends PlugInFrame implements ActionListener, KeyListener {
+public class custom_roiManager extends PlugInFrame implements ActionListener {
 
     Panel panel;
     RoiManager rm;
@@ -48,10 +46,8 @@ public class custom_roiManager extends PlugInFrame implements ActionListener, Ke
         setLayout(new BorderLayout());
 
         panel = new Panel();
-//        addButton("Add [t]");
-//        addButton("Delete");
-        addButton("Measure");
         addTextFields();
+        addButton("Multi Measure");
 
         add(panel);
 
@@ -127,12 +123,12 @@ public class custom_roiManager extends PlugInFrame implements ActionListener, Ke
     @Override
     public void actionPerformed(ActionEvent e) {
         String command = e.getActionCommand();
-        if (command.equals("Add [t]")){
-            rm.runCommand("add");
-        }else if (command.equals("Delete")) {
-            //rm.runCommand("Delete");
-        }else if (command.equals("Measure")) {
+        if (command.equals("Update Cells")){
+            updateCellSize(minField.getText(),maxField.getText());
+        }else if (command.equals("Multi Measure")){
             rm.runCommand("multi-measure");
+
+            //Gets active table and saves
             String path = PYTHONSCRIPT_PATH + "/cell_data/realResults.csv";
             ResultsTable results = ij.measure.ResultsTable.getResultsTable();
             try {
@@ -142,18 +138,9 @@ public class custom_roiManager extends PlugInFrame implements ActionListener, Ke
             }
 
             rm.close();
-        }else if (command.equals("Update Cells")){
-            updateCellSize(minField.getText(),maxField.getText());
+            setVisible(false);
         }
     }
-
-    public void keyPressed(KeyEvent e) {
-        int key = e.getKeyChar();
-        if (key == 'Q') //Q
-            rm.runCommand("Delete");
-    }
-    public void keyReleased (KeyEvent e) {}
-    public void keyTyped (KeyEvent e) {}
 
     public void addRoi(Roi roi){
         rm.addRoi(roi);
