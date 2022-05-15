@@ -138,15 +138,12 @@ def matchRefinedPeakToActualPeak(peaks, originalData):
         peakIndices.append(highPointIndex)
     return peakIndices
 
-
-
-
-###-----------------------------GLOBAL VARIABLES-----------------------------###
+##GLOBAL VARIABLES###
 cellData = read_csvs()
 cellID = 0
 fig = plt.figure()
 max = len(cellData.columns)
-###-----------------------------GLOBAL VARIABLES-----------------------------###
+##GLOBAL VARIABLES###
 
 
 
@@ -204,6 +201,7 @@ def cell_calculations():
     # normalize Data - don't need to use for now
     # normalBase = normalizeData(firstBaseline, cell, cellMean)
     smoothedData, smoothedBase = smoothDataPoints(firstBaseline,cellData,cell)
+    # plot graph
     refinedData = smoothedData - smoothedBase
 
     peaks, properties = find_peaks(refinedData, prominence=(5))
@@ -299,7 +297,9 @@ def user_removePeak(event):
         fig.clear()
         event.canvas.figure.clear()
         replot_cell(event.canvas.figure)
+
         event.canvas.draw()
+
         # print("DONE")
         plt.show()
 
@@ -343,6 +343,7 @@ def user_addPeak(event):
         event.canvas.figure.clear()
         replot_cell(event.canvas.figure)
         event.canvas.draw()
+
         # print("DONE")
         plt.show()
 
@@ -351,7 +352,7 @@ def user_addPeak(event):
 def main():
     # uncomment below line for debugging only (and be sure to close stdout at the end)
     # this redirects print() output to output.txt, which you will find in the Fiji.app directory after program finishes
-    sys.stdout = open('output.txt', 'w')
+    # sys.stdout = open('output.txt', 'w')
 
     # sorry about the globals. it's for a good cause, I promise.
     global cellData
@@ -375,12 +376,11 @@ def main():
     replot_cell(fig)
     plt.show()
 
-    # uncomment below for debugging only (also see output.txt at the start of main)
-    sys.stdout.close()
-
-    #write any changes made to csv file
+    # write to csv at the end (after window is closed)!
     write_csv(cellData)
 
+    # uncomment below for debugging only (also see output.txt at the start of main)
+    # sys.stdout.close()
 
 if __name__ == "__main__":
     main()
