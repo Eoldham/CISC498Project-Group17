@@ -166,7 +166,7 @@ Mainly used after user_addPeak or user_removePeak to replot and properly display
 removals
 """
 def replot_cell(figure):
-    print("HERE")
+    # print("HERE")
     figure.canvas.manager.set_window_title("Cell %d" %(cellID + 1))
     peakCol = "Cell" + str(cellID + 1) + "_Peaks"
     dataCol = "Mean" + str(cellID + 1)
@@ -175,7 +175,7 @@ def replot_cell(figure):
     if peakCol in cellData.columns:
             for i in range(0,len(cellData[peakCol])):
                 if cellData[peakCol][i] == 1: #1 signifies there is a peak, -1 means there is no peak
-                    print("peak")
+                    # print("peak")
                     figure.gca().plot(i,cellData[dataCol][i],marker="x",color="red")
 
 
@@ -246,13 +246,13 @@ def on_press(event):
 Function calls the proper add/remove peak function depending on type of mouse click
 """
 def on_click(event):
-    print("on_click")
+    # print("on_click")
     if event.button is MouseButton.LEFT:
-        print("LEFT")  # normal click
+        # print("LEFT")  # normal click
         # call add peak function
         user_addPeak(event)
     elif event.button is MouseButton.RIGHT:
-        print("Right")  # right click - remove
+        # print("Right")  # right click - remove
         # call remove peak function
         user_removePeak(event)
 
@@ -269,7 +269,7 @@ def user_removePeak(event):
     global cellData
     global fig
 
-    print("remove peak from graph function")
+    # print("remove peak from graph function")
     peakCol = "Cell" + str(cellID + 1) + "_Peaks"
     dataCol = "Mean" + str(cellID + 1)
 
@@ -277,7 +277,7 @@ def user_removePeak(event):
         ax = event.inaxes  # the axes instance
         x = int(event.xdata)
         y = int(event.ydata)
-        print('data coords %f %f' % (x, y))
+        # print('data coords %f %f' % (x, y))
 
         #finding the closest already defined peak (if there is any) to the mouseclick so we can remove it
         removeIdx = x
@@ -316,7 +316,7 @@ def user_addPeak(event):
     global cellData
     global fig
 
-    print("add peak to graph function")
+    # print("add peak to graph function")
     peakCol = "Cell" + str(cellID + 1) + "_Peaks"
     dataCol = "Mean" + str(cellID + 1)
 
@@ -324,7 +324,7 @@ def user_addPeak(event):
         ax = event.inaxes  # the axes instance
         x = int(event.xdata)
         y = int(event.ydata)
-        print('data coords %f %f' % (x, y))
+        # print('data coords %f %f' % (x, y))
 
         maxValIdx = x
         for data in range(x - 10, x + 10):  # original was 30
@@ -335,9 +335,9 @@ def user_addPeak(event):
                 continue  # ignore indexes that are out of range
 
         cellData.loc[maxValIdx,peakCol] = 1
-        print(cellData.loc[maxValIdx, peakCol])
-        print("x: " + str(maxValIdx))
-        print("y: " + str(cellData[dataCol][maxValIdx]))
+        # print(cellData.loc[maxValIdx, peakCol])
+        # print("x: " + str(maxValIdx))
+        # print("y: " + str(cellData[dataCol][maxValIdx]))
 
         fig.clear()
         event.canvas.figure.clear()
