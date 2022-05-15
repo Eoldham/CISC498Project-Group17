@@ -1,9 +1,7 @@
 import celldetection._3D_objects_counter;
-import ij.IJ;
-import ij.ImageJ;
-import ij.ImagePlus;
-import ij.WindowManager;
+import ij.*;
 import ij.gui.NonBlockingGenericDialog;
+import ij.gui.Overlay;
 import ij.gui.Roi;
 import ij.measure.ResultsTable;
 import ij.plugin.PlugIn;
@@ -72,11 +70,60 @@ public class CalciumSignal_ implements PlugIn {
         -- PEAK FINDING --
          */
         try {
+            // Attempt to find the preferred command or path for python 3
+            String systemPath = System.getenv("PATH");
+            String[] pathLines = systemPath.split(":");
+            String exePath = "python";
+            String os = System.getProperty("os.name");
+
+            if (os.contains("Windows")) {
+                for (String entry : pathLines) {
+                    boolean pyPath = entry.contains("python") || entry.contains("python3");
+
+                    if (pyPath) {
+                        if (entry.contains("python3")) {
+                            exePath = entry.substring(entry.indexOf(System.getProperty("file.separator")) + 1);
+                        }
+                    }
+                }
+            } else {
+                String[] bin = new File("/usr/bin").list();
+                for (String cmdName : bin) {
+                    if (cmdName.equals("python") || cmdName.equals("python3")) {
+                        exePath = cmdName;
+                    }
+                }
+                String[] local = new File("/usr/local/bin").list();
+                for (String cmdName : local) {
+                    if (cmdName.equals("python") || cmdName.equals("python3")) {
+                        // Prefer local distribution (/usr/local/bin)...use full path
+                        exePath = "/usr/local/bin/" + cmdName;
+                    }
+                }
+            }
+
             // RELATIVE TO LOCATION OF FIJI EXECUTABLE
-            ProcessBuilder processBuilder = new ProcessBuilder("python", PYTHONSCRIPT_PATH + "/peakscript.py");
+            ProcessBuilder processBuilder = new ProcessBuilder(exePath, PYTHONSCRIPT_PATH + "/peakscript.py");
             processBuilder.redirectErrorStream(true);
 
             Process process = processBuilder.start();
+            BufferedReader errout = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            String line;
+
+            while ((line = errout.readLine()) != null) {
+                IJ.log(line);
+            }
+
+            // Use for debugging only
+            /*
+            BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line2;
+
+            while ((line2 = input.readLine()) != null) {
+                IJ.log(line2);
+            }
+             */
+
         } catch (Exception ex) {
             IJ.log(ex.getMessage());
         }
@@ -86,7 +133,7 @@ public class CalciumSignal_ implements PlugIn {
     void runRoiManager(){
 
         //Creates RoiManager
-        RoiManager rm = new RoiManager();
+        custom_roiManager crm = new custom_roiManager(PYTHONSCRIPT_PATH);
 
         //Creates New scanner of edgeDetection CSV
         try {
@@ -109,56 +156,22 @@ public class CalciumSignal_ implements PlugIn {
                 line = scan.nextLine();
                 splitLine = line.split("[,]");
 
-                //int fixer = 0;
-                int fixer = 10;
-
-                //Set all necessary vars
-//                x = Double.parseDouble(splitLine[4])  - fixer;
-//                y = Double.parseDouble(splitLine[5]) - fixer;
-//                width = Double.parseDouble(splitLine[7]);
-//                height = Double.parseDouble(splitLine[8]);
-
-                    x = Double.parseDouble(splitLine[12])  - fixer;
-                    y = Double.parseDouble(splitLine[13]) - fixer;
-                    width = Double.parseDouble(splitLine[24]);
-                    height = Double.parseDouble(splitLine[25]);
+                // This is used to make sure we have x and y at the center of the detected region
+                width = Double.parseDouble(splitLine[24]);
+                height = Double.parseDouble(splitLine[25]);
+                x = Double.parseDouble(splitLine[12]) - width/2 ;
+                y = Double.parseDouble(splitLine[13]) - height/2;
 
                 //Create ROI with Input: int x, int y, int width, int height, int cornerDiameter
                 Roi roi = new Roi((int)x, (int)y, (int)width, (int)height, cornerDiameter);
 
 
                 //Add Roi to RoiManager
-                rm.addRoi(roi);
-
+                crm.addRoi(roi);
 
             }
         }catch(IOException e) {
             e.printStackTrace();
-        }
-
-        //Makes Roi's visible in roi Manager
-        //rm.runCommand("show all with labels");
-        rm.runCommand("show all");
-
-
-        NonBlockingGenericDialog message =  new NonBlockingGenericDialog("Done editing cells");
-        message.addMessage("When you are done adding and deleting cells press OK to measure");
-        message.showDialog();
-
-        if (message.wasOKed()) {
-
-            rm.runCommand("multi-measure");
-
-            //Gets active table and saves
-            String path = PYTHONSCRIPT_PATH + "/cell_data/realResults.csv";
-            ResultsTable results = ij.measure.ResultsTable.getResultsTable();
-            try {
-                results.saveAs(path);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            rm.close();
         }
 
     }
