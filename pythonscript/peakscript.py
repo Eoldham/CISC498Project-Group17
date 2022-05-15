@@ -23,6 +23,8 @@ def read_csvs():
     df = df.dropna(axis="columns")  ##eliminate columns with NaN values
     return df
 
+
+
 """Stores all relevant graph data to a csv for the ImageJ plugin to use"""
 def write_csv(df):
     # when we have a folder of, files, read in from directory path
@@ -30,16 +32,20 @@ def write_csv(df):
     df.to_csv(os.path.join(path, "graph_data.csv"))
     return
 
+
+
 """ Stores peak locations at the correct frame # in dataframe.
 If there is a peak, value will be 1, if no peak detected, value is -1."""
 def writePeaksToDf(peakIndx,df, cellnum):
     peaks = [-1] * len(df)
-    colName = "Cell" + str(cellnum) + "_Peaks"
+    colName = "Cell" + str(cellnum+1) + "_Peaks"
     for peakFrame in peakIndx:
         peaks[peakFrame] = 1
     newDf = df.copy()
     newDf[colName] = peaks
     return newDf
+
+
 
 """Finds first rough baseline from data
    Looks at all elements below the average and averages them
@@ -51,6 +57,7 @@ def findBaseline(avg, intensities, cellDf):
     base = sum(intensities) / len(intensities)
     cellDf['baseline'] = base
     return (base)
+
 
 
 """Creates a new df column with normalized data"""
@@ -90,6 +97,8 @@ def smoothDataPoints(normalBase, df, cellMean):
     findNormalizedBase(filteredLowPass-newbase,df)
     return filteredLowPass, newbase
 
+
+
 """
 This function is for testing only
 """
@@ -103,6 +112,9 @@ def plotPeakCellData(x,y,df):
     plt.plot(df["normalbaseline"],color='red',label="baseline")
 
 
+"""
+Plots the calcium signaling data on a graph
+"""
 def plotOriginalCellData(y, figure):
     plt.title("Original Calcium Intensity Over Time")
     plt.xlabel("Video Frame (#)")
@@ -110,6 +122,10 @@ def plotOriginalCellData(y, figure):
     figure.gca().plot(y)
 
 
+
+"""
+Function matches the peak detected on the smoothed graph to the correct frame in original data
+"""
 def matchRefinedPeakToActualPeak(peaks, originalData):
     # since data was smoothed when peaks were detected, look for highest point around frame
     # where peak was detected in the original data based on an error deviation
@@ -122,13 +138,21 @@ def matchRefinedPeakToActualPeak(peaks, originalData):
         peakIndices.append(highPointIndex)
     return peakIndices
 
-##GLOBAL VARIABLES###
+
+
+
+###-----------------------------GLOBAL VARIABLES-----------------------------###
 cellData = read_csvs()
 cellID = 0
 fig = plt.figure()
 max = len(cellData.columns)
-##GLOBAL VARIABLES###
+###-----------------------------GLOBAL VARIABLES-----------------------------###
 
+
+
+"""
+Plots peaks on a graph with the original data (peaks are marked with "x")
+"""
 def plotPeaksOnOriginalData(peaks,data,cellnum,figure):
     plt.title("Original Calcium Intensity Over Time with Peaks")
     plt.xlabel("Video Frame (#)")
@@ -137,6 +161,13 @@ def plotPeaksOnOriginalData(peaks,data,cellnum,figure):
     for idx in peaks:
         figure.gca().plot(idx, data[idx],"x")
 
+
+
+"""
+Function rechecks peak columns to figure out where the peaks are and replots them on the current figure.
+Mainly used after user_addPeak or user_removePeak to replot and properly display figure with the new additions or new
+removals
+"""
 def replot_cell(figure):
     print("HERE")
     figure.canvas.manager.set_window_title("Cell %d" %(cellID + 1))
@@ -146,20 +177,23 @@ def replot_cell(figure):
     plotOriginalCellData(cellData[dataCol].values.tolist(), figure)
     if peakCol in cellData.columns:
             for i in range(0,len(cellData[peakCol])):
-                if cellData[peakCol][i] == 1:
+                if cellData[peakCol][i] == 1: #1 signifies there is a peak, -1 means there is no peak
                     print("peak")
                     figure.gca().plot(i,cellData[dataCol][i],marker="x",color="red")
 
-    #cellData = writePeaksToDf(peakIndices,cellData,cellID)
 
-    #return cellData
 
-def plot_cell(figure):
+"""
+Function does main calculations for cell data.  Calls other functions to determine baseline,
+get smoothed/refined data values, and determine peaks.  Once it's finished, it saves the
+peaks to the dataframe.
+"""
+def cell_calculations():
     global cellID
     global cellData
 
     # we're really starting from Cell 0 because of indices. but it's easier for the client to start from 1
-    figure.canvas.manager.set_window_title("Cell %d" %(cellID + 1))
+    #figure.canvas.manager.set_window_title("Cell %d" %(cellID + 1))
     # figure.canvas.toolbar.pack_forget()
     cell = cellData.columns[cellID]
     videoFrames = len(cellData)
@@ -170,7 +204,6 @@ def plot_cell(figure):
     # normalize Data - don't need to use for now
     # normalBase = normalizeData(firstBaseline, cell, cellMean)
     smoothedData, smoothedBase = smoothDataPoints(firstBaseline,cellData,cell)
-    # plot graph
     refinedData = smoothedData - smoothedBase
 
     peaks, properties = find_peaks(refinedData, prominence=(5))
@@ -180,15 +213,7 @@ def plot_cell(figure):
     #plotPeaksOnOriginalData(peakIndices,originalIntensities,cellID,figure)
     cellData = writePeaksToDf(peakIndices,cellData,cellID)
     #return cellData
-"""
-    peakCol = "Cell" + str(cellID + 1) + "_Peaks"
-    dataCol = "Mean" + str(cellID + 1)
 
-    if peakCol in cellData.columns:
-        for i in range(0,len(cellData[peakCol])):
-            if cellData[peakCol][i] == 1:
-                plt.plot(i,cellData[dataCol][i],marker="x",color="red")
-"""
 
 
 
@@ -218,6 +243,10 @@ def on_press(event):
         event.canvas.draw()
 
 
+
+"""
+Function calls the proper add/remove peak function depending on type of mouse click
+"""
 def on_click(event):
     print("on_click")
     if event.button is MouseButton.LEFT:
@@ -230,23 +259,29 @@ def on_click(event):
         user_removePeak(event)
 
 
+
+"""
+Function removes peak from the graph
+    -registers x,y coordinate of mouse click
+    -determines closest peak in df (based on frame range) to mouse click
+    -removes this point from df (make it -1)
+    -replot any peaks
+"""
 def user_removePeak(event):
     global cellData
     global fig
 
     print("remove peak from graph function")
-    ##register x,y coordinate of mouse click
-    #determine closest peak in df (based on frame range) to mouse click
-    #remove this point from df (make it -1)
-    #replot any peaks
     peakCol = "Cell" + str(cellID + 1) + "_Peaks"
     dataCol = "Mean" + str(cellID + 1)
+
     if event.inaxes:  # checks to see if user clicked on the plotted graph
         ax = event.inaxes  # the axes instance
         x = int(event.xdata)
         y = int(event.ydata)
         print('data coords %f %f' % (x, y))
 
+        #finding the closest already defined peak (if there is any) to the mouseclick so we can remove it
         removeIdx = x
         diff = x
         for data in range(x - 10, x + 10):  # original was 30
@@ -264,21 +299,27 @@ def user_removePeak(event):
         fig.clear()
         event.canvas.figure.clear()
         replot_cell(event.canvas.figure)
-
         event.canvas.draw()
-
         # print("DONE")
         plt.show()
 
 
+
+"""
+Function adds peak to the graph
+    -registers x,y coordinate of mouse click
+    -determines relatively highest y value in df (based on frame range) to mouse click
+    -adds this point as peak (make it 1)
+    -replot any peaks
+"""
 def user_addPeak(event):
     global cellData
     global fig
 
     print("add peak to graph function")
-    #following two lines should be in another function before carosel view
     peakCol = "Cell" + str(cellID + 1) + "_Peaks"
     dataCol = "Mean" + str(cellID + 1)
+
     if event.inaxes: # checks to see if user clicked on the plotted graph
         ax = event.inaxes  # the axes instance
         x = int(event.xdata)
@@ -292,7 +333,7 @@ def user_addPeak(event):
                     maxValIdx = data
             except:
                 continue  # ignore indexes that are out of range
-        #print(cellData[peakCol][maxValIdx])
+
         cellData.loc[maxValIdx,peakCol] = 1
         print(cellData.loc[maxValIdx, peakCol])
         print("x: " + str(maxValIdx))
@@ -302,9 +343,9 @@ def user_addPeak(event):
         event.canvas.figure.clear()
         replot_cell(event.canvas.figure)
         event.canvas.draw()
-
         # print("DONE")
         plt.show()
+
 
 
 def main():
@@ -323,18 +364,23 @@ def main():
     numColumns = len(cellData.columns)
     for col in range(0,numColumns):
         cellID = col
-        plot_cell(fig)
-    #plt.show()
+        cell_calculations()
+
     cellID = 0
-    # write to csv at the end (after window is closed)!
     write_csv(cellData)
     path = "plugins/CalciumSignal/pythonscript/cell_data/"
     cellData = pd.read_csv((path + "graph_data.csv"))
+
+    #plot cells and open carousel view for user to click through
     replot_cell(fig)
     plt.show()
 
     # uncomment below for debugging only (also see output.txt at the start of main)
     sys.stdout.close()
+
+    #write any changes made to csv file
+    write_csv(cellData)
+
 
 if __name__ == "__main__":
     main()
