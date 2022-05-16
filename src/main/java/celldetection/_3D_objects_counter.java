@@ -585,7 +585,3 @@ public class _3D_objects_counter implements PlugIn, AdjustmentListener, FocusLis
     }
 
 }
-
-
-
-}
