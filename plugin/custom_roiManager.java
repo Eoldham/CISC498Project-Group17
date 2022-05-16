@@ -201,14 +201,14 @@ public class custom_roiManager extends PlugInFrame implements ActionListener {
             }
 
             // Use for debugging only
-
+            /*
             BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line2;
 
             while ((line2 = input.readLine()) != null) {
                 IJ.log(line2);
             }
-
+             */
 
         } catch (Exception ex) {
             IJ.log(ex.getMessage());

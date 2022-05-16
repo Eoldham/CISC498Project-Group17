@@ -275,6 +275,7 @@ public class _3D_objects_counter implements PlugIn, AdjustmentListener, FocusLis
     // The code below is to implement a canny-edge mask onto the edge-detector to increase its accuracy.
     // However, we were not able to implement it fully.
 
+    /*
     public void process() {
         width = sourceImage.getWidth();
         height = sourceImage.getHeight();
@@ -489,6 +490,7 @@ public class _3D_objects_counter implements PlugIn, AdjustmentListener, FocusLis
                 float swMag = hypot(xGradient[indexSW], yGradient[indexSW]);
                 float nwMag = hypot(xGradient[indexNW], yGradient[indexNW]);
                 float tmp;
+                */
                 /*
                  * An explanation of what's happening here, for those who want
                  * to understand the source: This performs the "non-maximal
@@ -517,22 +519,23 @@ public class _3D_objects_counter implements PlugIn, AdjustmentListener, FocusLis
                  * variable (3) and reused in the mirror case (4).
                  *
                  */
-                if (xGrad * yGrad <= (float) 0 /*(1)*/
-                        ? Math.abs(xGrad) >= Math.abs(yGrad) /*(2)*/
-                        ? (tmp = Math.abs(xGrad * gradMag)) >= Math.abs(yGrad * neMag - (xGrad + yGrad) * eMag) /*(3)*/
-                        && tmp > Math.abs(yGrad * swMag - (xGrad + yGrad) * wMag) /*(4)*/
-                        : (tmp = Math.abs(yGrad * gradMag)) >= Math.abs(xGrad * neMag - (yGrad + xGrad) * nMag) /*(3)*/
-                        && tmp > Math.abs(xGrad * swMag - (yGrad + xGrad) * sMag) /*(4)*/
-                        : Math.abs(xGrad) >= Math.abs(yGrad) /*(2)*/
-                        ? (tmp = Math.abs(xGrad * gradMag)) >= Math.abs(yGrad * seMag + (xGrad - yGrad) * eMag) /*(3)*/
-                        && tmp > Math.abs(yGrad * nwMag + (xGrad - yGrad) * wMag) /*(4)*/
-                        : (tmp = Math.abs(yGrad * gradMag)) >= Math.abs(xGrad * seMag + (yGrad - xGrad) * sMag) /*(3)*/
-                        && tmp > Math.abs(xGrad * nwMag + (yGrad - xGrad) * nMag) /*(4)*/
-                ) {
-                    magnitude[index] = gradMag >= MAGNITUDE_LIMIT ? MAGNITUDE_MAX : (int) (MAGNITUDE_SCALE * gradMag);
+                /*if (xGrad * yGrad <= (float) 0 *//*(1)*//*
+                        ? Math.abs(xGrad) >= Math.abs(yGrad) *//*(2)*//*
+                        ? (tmp = Math.abs(xGrad * gradMag)) >= Math.abs(yGrad * neMag - (xGrad + yGrad) * eMag) *//*(3)*//*
+                        && tmp > Math.abs(yGrad * swMag - (xGrad + yGrad) * wMag) *//*(4)*//*
+                        : (tmp = Math.abs(yGrad * gradMag)) >= Math.abs(xGrad * neMag - (yGrad + xGrad) * nMag) *//*(3)*//*
+                        && tmp > Math.abs(xGrad * swMag - (yGrad + xGrad) * sMag) *//*(4)*//*
+                        : Math.abs(xGrad) >= Math.abs(yGrad) *//*(2)*//*
+                        ? (tmp = Math.abs(xGrad * gradMag)) >= Math.abs(yGrad * seMag + (xGrad - yGrad) * eMag) *//*(3)*//*
+                        && tmp > Math.abs(yGrad * nwMag + (xGrad - yGrad) * wMag) *//*(4)*//*
+                        : (tmp = Math.abs(yGrad * gradMag)) >= Math.abs(xGrad * seMag + (yGrad - xGrad) * sMag) *//*(3)*//*
+                        && tmp > Math.abs(xGrad * nwMag + (yGrad - xGrad) * nMag) *//*(4)*//*
+                ) {*/
+                    // magnitude[index] = gradMag >= MAGNITUDE_LIMIT ? MAGNITUDE_MAX : (int) (MAGNITUDE_SCALE * gradMag);
                     //NOTE: The orientation of the edge is not employed by this
                     //implementation. It is a simple matter to compute it at
                     //this point as: Math.atan2(yGrad, xGrad);
+                /*
                 } else {
                     magnitude[index] = 0;
                 }
@@ -583,5 +586,6 @@ public class _3D_objects_counter implements PlugIn, AdjustmentListener, FocusLis
             }
         }
     }
+    */
 
 }
